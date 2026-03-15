@@ -21,7 +21,7 @@ export default function Settings() {
   const { employees, getOverallRisk, getFitmentBand, getFatigueRisk } = useWorkforceData();
   
   // Role-based visibility
-  const isManager = user?.role === "manager";
+  const isManager = (user?.role || "").toLowerCase() === "manager";
 
   if (!employees) return <div className="flex items-center justify-center min-h-screen">Loading system data...</div>;
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+﻿import React, { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
 import {
@@ -26,7 +26,7 @@ import {
 } from "recharts";
 import { getWorkforceKPIs, getDepartmentDistributions, getAISignals } from "@/lib/workforce-utils";
 import { SkeletonKPICard } from "@/components/SkeletonCard";
-import { api } from "@/services/api";
+import { api } from "@/servicess/api";
 import { useToast } from "@/hooks/use-toast";
 
 // Brand palette chart colors
@@ -108,7 +108,7 @@ export default function Dashboard() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
 
-      {/* ── HEADER ── */}
+      {/* ΓöÇΓöÇ HEADER ΓöÇΓöÇ */}
       <div>
         <h1 className="page-title">Workforce Intelligence Command Center</h1>
         <p style={{ color: "#6B8299", marginTop: "6px", fontSize: "14px" }}>
@@ -116,7 +116,7 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* ── KPI HERO STRIP ── */}
+      {/* ΓöÇΓöÇ KPI HERO STRIP ΓöÇΓöÇ */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px" }}>
         {isLoading ? (
           [0,1,2,3].map(i => <SkeletonKPICard key={i} />)
@@ -130,7 +130,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* ── VISUAL INTELLIGENCE GRID ── */}
+      {/* ΓöÇΓöÇ VISUAL INTELLIGENCE GRID ΓöÇΓöÇ */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "20px" }}>
 
         {/* Fitment Health */}
@@ -143,7 +143,7 @@ export default function Dashboard() {
           <PieBlock data={fatiguePie} centerLabel={`${kpis.burnoutRisk}%`} centerSub="at risk" />
         </ChartCard>
 
-        {/* Automation Potential — highlighted */}
+        {/* Automation Potential ΓÇö highlighted */}
         <ChartCard title="Automation Potential" onClick={() => go("/workforce-intelligence")} highlight>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "200px" }}>
             <div style={{ textAlign: "center" }}>
@@ -191,8 +191,8 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </ChartCard>
 
-        {/* 6×6 Matrix */}
-        <ChartCard title="6×6 Workforce Matrix" onClick={() => go("/six-by-six")}>
+        {/* 6├ù6 Matrix */}
+        <ChartCard title="6├ù6 Workforce Matrix" onClick={() => go("/six-by-six")}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", paddingTop: "8px" }}>
             {["Critical", "High", "Medium", "Stable", "Strong", "Elite"].map(x => (
               <div
@@ -211,11 +211,11 @@ export default function Dashboard() {
 
       </div>
 
-      {/* ── AI SIGNALS ── */}
+      {/* ΓöÇΓöÇ AI SIGNALS ΓöÇΓöÇ */}
       <div className="ai-signals-card">
         <div className="chart-card-header">
           <span className="chart-card-title">AI Workforce Signals</span>
-          <span style={{ fontSize: "11px", color: "#6D8196", fontWeight: 500 }}>Live · Auto-updating</span>
+          <span style={{ fontSize: "11px", color: "#6D8196", fontWeight: 500 }}>Live ┬╖ Auto-updating</span>
         </div>
         <div>
           {aiSignals.length > 0 ? aiSignals.map((sig, i) => (
@@ -228,7 +228,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── METRIC DETAIL MODAL ── */}
+      {/* ΓöÇΓöÇ METRIC DETAIL MODAL ΓöÇΓöÇ */}
       <Dialog open={!!selectedMetric} onOpenChange={() => setSelectedMetric(null)}>
         <DialogContent style={{ borderRadius: "14px", border: "1px solid #E6E6E6", boxShadow: "0 20px 60px rgba(0,0,0,0.12)", maxHeight: "90vh", overflowY: "auto" }}>
           <DialogHeader>

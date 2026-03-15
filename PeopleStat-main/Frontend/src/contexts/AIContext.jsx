@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useMemo } from "react";
-import { employees as centralEmployees, getOverallRisk } from "@/data/mockEmployeeData";
+import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
+import { useWorkforceData } from "./WorkforceContext.jsx";
 import { chatWithAI } from "@/services/api";
 
 // AI Context for managing chat state across the app
@@ -17,21 +17,24 @@ export const AIProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
+  const { employees: centralEmployees, getOverallRisk } = useWorkforceData();
 
   // Comprehensive Workforce Data Engine - Derived from Central Data
   const workforceData = useMemo(() => {
     const data = {};
+    if (!centralEmployees) return data;
+    
     centralEmployees.forEach(e => {
       data[e.name] = {
-        id: e.employeeId,
+        id: e.id,
         role: e.position,
         department: e.department,
         fitment: e.scores.fitment,
         fatigue: e.scores.fatigue,
         softSkills: {
-          leadership: e.scores.aptitude,
-          communication: e.scores.skill,
-          teamwork: 80 // Placeholder for specific teamwork metric
+          leadership: e.scores.performance > 80 ? 85 : 65,
+          communication: 80,
+          teamwork: 80 
         },
         sixBySix: {
           fatigue: e.scores.fatigue > 75 ? "Critical" : e.scores.fatigue > 45 ? "Medium" : "Low",
@@ -42,15 +45,14 @@ export const AIProvider = ({ children }) => {
         recommendations: [
           e.scores.fatigue > 75 ? "Reduce workload by 20%" : "Continue current path",
           e.scores.fitment < 70 ? "Target for reskilling" : "Mentor others",
-          "Schedule monthly performance reviews"
         ],
-        skills: [...e.skills.hard, ...e.skills.soft],
+        skills: [...(e.skills?.hard || []), ...(e.skills?.soft || [])],
         utilization: e.scores.utilization,
-        lastReview: "2024-01-15"
+        lastReview: "2024-03-01"
       };
     });
     return data;
-  }, []);
+  }, [centralEmployees, getOverallRisk]);
 
   // Enhanced AI message processing with backend integration
   const sendMessage = async (message, mode = 'workforce') => {

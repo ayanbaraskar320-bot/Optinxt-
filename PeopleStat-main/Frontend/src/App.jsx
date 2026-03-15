@@ -99,7 +99,7 @@ function ManagerRoute({ component: Component }) {
 
   if (!user) return null;
 
-  if (user.role !== "manager") {
+  if ((user.role || "").toLowerCase() !== "manager") {
     return (
       <div className="flex items-center justify-center h-screen text-center">
         <div className="max-w-md p-8 bg-white rounded-2xl shadow-xl border border-slate-100">
@@ -131,7 +131,7 @@ function AppRouter() {
       <Route path="/dashboard" component={() => (
         <ProtectedRoute component={() => {
           const { user } = useAuth();
-          return user.role === "manager" ? <Dashboard /> : <EmployeeDashboard />;
+          return (user.role || "").toLowerCase() === "manager" ? <Dashboard /> : <EmployeeDashboard />;
         }} />
       )} />
       <Route path="/employees" component={() => <ManagerRoute component={Employees} />} />

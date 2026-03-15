@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+﻿import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,14 +46,14 @@ import {
 import { employees as initialEmployees, getOverallRisk } from "@/data/mockEmployeeData";
 import { useAuth } from "@/lib/auth";
 import EmployeeDrawer from "@/components/EmployeeDrawer";
-import { api } from "@/services/api";
+import { api } from "@/servicess/api";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Softskills() {
   const { user } = useAuth();
-  const isEmployee = (user?.role || "").toLowerCase() === "employee";
+  const isEmployee = user?.role === "employee";
   const { toast } = useToast();
   const [employees, setEmployees] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -421,7 +421,7 @@ export default function Softskills() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center text-xs font-bold text-slate-500 uppercase tracking-widest px-1">
                   <span>Traits Overview</span>
-                  <span className="text-blue-600">Details →</span>
+                  <span className="text-blue-600">Details ΓåÆ</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {teamHealth.skills.map((s, idx) => (
@@ -452,7 +452,7 @@ export default function Softskills() {
                   </div>
                   <div className="flex flex-col items-end">
                     <Badge variant="outline" className={`border-none px-1 text-[10px] font-black tracking-widest ${trait.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                      {trait.trend === 'up' ? '▲ GAINING' : '▼ DROPPING'}
+                      {trait.trend === 'up' ? 'Γû▓ GAINING' : 'Γû╝ DROPPING'}
                     </Badge>
                   </div>
                 </div>
@@ -579,7 +579,7 @@ export default function Softskills() {
                     <p className="text-sm text-slate-500 font-medium line-clamp-2 italic">"{signal.action}"</p>
                   </div>
                   <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between">
-                    <span className="text-[10px] font-black text-slate-400 uppercase">Impact Check →</span>
+                    <span className="text-[10px] font-black text-slate-400 uppercase">Impact Check ΓåÆ</span>
                     <div className="flex -space-x-2">
                       {signal.employees.slice(0, 3).map((e, i) => (
                         <div key={i} className="w-6 h-6 rounded-lg bg-slate-100 border border-white flex items-center justify-center text-[10px] font-black text-slate-500">
@@ -619,7 +619,7 @@ export default function Softskills() {
                     <p className="text-xs text-slate-500 font-medium leading-relaxed">{opp.nextStep}</p>
                   </div>
                   <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between relative z-10">
-                    <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Review Candidates →</span>
+                    <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Review Candidates ΓåÆ</span>
                     <TrendingUp className="h-4 w-4 text-blue-300 group-hover:text-blue-600 transition-colors" />
                   </div>
                   {/* Subtle highlight bar */}
@@ -706,7 +706,7 @@ export default function Softskills() {
                 <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Global Health Index</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-6xl font-black text-slate-900 tracking-tighter">{teamHealth.score}</span>
-                  <span className="text-green-600 font-bold">▲ 2.1%</span>
+                  <span className="text-green-600 font-bold">Γû▓ 2.1%</span>
                 </div>
               </div>
               <div className="text-right">
@@ -760,7 +760,7 @@ export default function Softskills() {
                 <div className="flex items-baseline gap-2">
                   <span className="text-6xl font-black tracking-tighter tabular-nums">{modalData?.score}%</span>
                   <span className={`text-xs font-bold ${modalData?.trend === 'up' ? 'text-green-400' : 'text-red-400'}`}>
-                    {modalData?.trend === 'up' ? '▲' : '▼'} {Math.abs(modalData?.score - (modalData?.benchmark || 0))} pts
+                    {modalData?.trend === 'up' ? 'Γû▓' : 'Γû╝'} {Math.abs(modalData?.score - (modalData?.benchmark || 0))} pts
                   </span>
                 </div>
               </div>

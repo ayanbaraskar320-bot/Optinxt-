@@ -5,7 +5,7 @@ import {
   Grid,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { api } from "@/servicess/api";
+import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -174,7 +174,6 @@ export default function SixBySixAnalysis() {
             </div>
           </CardContent>
         </Card>
-d>
 
         <div className="space-y-6">
           <Card>

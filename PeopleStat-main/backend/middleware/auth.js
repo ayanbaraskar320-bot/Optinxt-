@@ -36,7 +36,7 @@ export const protect = async (req, res, next) => {
 };
 
 export const managerOnly = (req, res, next) => {
-  if (req.user && req.user.role === 'manager') {
+  if (req.user && (req.user.role || "").toLowerCase() === 'manager') {
     next();
   } else {
     res.status(403).json({

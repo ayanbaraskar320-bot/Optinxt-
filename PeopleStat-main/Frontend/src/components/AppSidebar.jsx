@@ -67,7 +67,7 @@ const adminOptimizationItems = [
 export function AppSidebar() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
-  const role = user?.role || "employee";
+  const role = (user?.role || "employee").toLowerCase();
 
   const handleLogout = () => {
     logout();
