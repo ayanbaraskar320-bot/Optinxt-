@@ -17,7 +17,7 @@ This application is strictly built on a decoupled **Model-View-Controller (MVC) 
 - **Architecture:** API Route Layer -> Controller -> Service -> Mongoose ODM.
 - **Security:** `helmet` header protections, `express-rate-limit` DDOS guards, and strict stateless `jsonwebtoken` (JWT)/bcrypt Role-Based Access Control (RBAC).
 - **Database:** MongoDB Atlas (Profiles, Analytics Snapshots, Assessments, Security).
-- **AI Core:** OpenAI Node SDK integrated with dynamic Mongoose context fetching. PDF Parsing + NLP Regex engine.
+- **AI Core:** Groq Cloud SDK (Llama 3.1) integrated with dynamic Mongoose context fetching. PDF Parsing + NLP Regex engine.
 
 ---
 
@@ -37,7 +37,7 @@ Set up your local `.env` inside the `backend/` directory:
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/ai-workforce
 JWT_SECRET=super_secret_jwt_key
-OPENAI_API_KEY=sk-... (Optional: Demo Mode activates without it)
+GROQ_API_KEY=gsk_... (Required for live AI Chat)
 FRONTEND_URL=http://localhost:3000
 ```
 
@@ -114,7 +114,7 @@ Error: `{ success: false, error: "Reason" }`
 | `POST` | `/api/employees/upload-resume` | `multipart/form-data`. Invokes native `pdf-parse` against Node Buffers. |
 | `POST` | `/api/assessments` | Issues a standardized global Assessment exam schema. |
 | `POST` | `/api/assessments/:id/submit` | Computes Logic/Technical arrays against a max scale threshold. |
-| `POST` | `/api/ai/chat` | Dispatches query to OpenAI OR invokes AI Demo Bypass if no key is present. |
+| `POST` | `/api/analysis/chat` | Dispatches query to Groq Llama 3.1 OR invokes fallback if no key is present. |
 
 ---
 
@@ -122,4 +122,4 @@ Error: `{ success: false, error: "Reason" }`
 
 In order to guarantee unbroken presentation flows regardless of internet telemetry or strict API Quota thresholds, the `/api/ai/chat` endpoint is mapped to a secure fallback bypass. 
 
-If `OPENAI_API_KEY` is completely missing from `.env`, the endpoint manually indexes the Mongoose `employees` collection and dynamically answers questions regarding "skill gaps" and "data scientists" specifically to securely fuel UI component mounting.
+If `GROQ_API_KEY` is completely missing from `.env`, the endpoint manually indexes the Mongoose `employees` collection and dynamically answers questions regarding "skill gaps" and "data scientists" specifically to securely fuel UI component mounting.

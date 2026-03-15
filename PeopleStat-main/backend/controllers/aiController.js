@@ -1,10 +1,6 @@
-/**
- * AI Controller — ESM version
- * Handles AI assistants and fitment analysis triggers
- */
 import Employee from '../models/Employee.js';
 import AnalysisResult from '../models/AnalysisResult.js';
-import { OpenAI } from 'openai';
+import Groq from 'groq-sdk';
 
 export const runFitment = async (req, res) => {
   try {
@@ -44,32 +40,28 @@ export const chatAssistant = async (req, res) => {
     const { message, mode } = req.body;
     const isCareerCoach = mode === 'career_coach';
 
-    // If API key is available, use LLM
-    const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
-    console.log(`AI Assistant Triggered (${mode || 'workforce'}). Using Key Type:`, process.env.GROQ_API_KEY ? 'GROQ' : 'OPENAI');
+    // Using Groq API Key
+    const apiKey = process.env.GROQ_API_KEY;
+    console.log(`AI Assistant Triggered (${mode || 'workforce'}).`);
 
     if (apiKey) {
-      const isGroq = !!process.env.GROQ_API_KEY;
-      const openai = new OpenAI({ 
-        apiKey: apiKey,
-        baseURL: isGroq ? "https://api.groq.com/openai/v1" : undefined
-      });
+      const groq = new Groq({ apiKey });
 
       // POWERFUL CONTEXT FETCHING (Top 100 analysis results to answer general questions)
       const words = message.replace(/[?!.]/g, '').split(' ').filter(w => w.length > 2);
       const nameRegex = words.length > 0 ? new RegExp(words.join('|'), 'i') : null;
-      
+
       const [mentionedEmployee, generalAnalyses] = await Promise.all([
         nameRegex ? Employee.findOne({ name: { $regex: nameRegex } }) : null,
         AnalysisResult.find().sort({ analysis_date: -1 }).limit(100).populate('employee_id', 'name band process_area position skills')
       ]);
 
-      console.log(`Context: Found ${generalAnalyses.length} analyses. Specific employee match: ${mentionedEmployee ? 'YES ('+mentionedEmployee.name+')' : 'NO'}`);
+      console.log(`Context: Found ${generalAnalyses.length} analyses. Specific employee match: ${mentionedEmployee ? 'YES (' + mentionedEmployee.name + ')' : 'NO'}`);
 
       // Build a rich text context for the AI
       let dataContext = "WORKFORCE DATA SNAPSHOT (Real-time):\n";
       generalAnalyses.forEach((a, i) => {
-        dataContext += `${i+1}. ${a.employee_id?.name || 'Unknown'}: Role=${a.employee_id?.position || 'N/A'}, Fitment=${a.fitment_score}%, Productivity=${a.productivity_score}%, Fatigue=${a.fatigue_score}%, Status=${a.recommendation_type}\n`;
+        dataContext += `${i + 1}. ${a.employee_id?.name || 'Unknown'}: Role=${a.employee_id?.position || 'N/A'}, Fitment=${a.fitment_score}%, Productivity=${a.productivity_score}%, Fatigue=${a.fatigue_score}%, Status=${a.recommendation_type}\n`;
       });
 
       if (mentionedEmployee) {
@@ -114,7 +106,7 @@ ${dataContext}`;
       }
 
       try {
-        const completion = await openai.chat.completions.create({
+        const chatCompletion = await groq.chat.completions.create({
           messages: [
             {
               role: 'system',
@@ -122,44 +114,31 @@ ${dataContext}`;
             },
             { role: 'user', content: message },
           ],
-          model: 'llama-3.1-8b-instant', // Stable Groq model
-          temperature: 0.2, // Slightly higher for coach
-          max_tokens: 800
+          model: 'llama-3.1-8b-instant',
+          temperature: 0.2,
+          max_tokens: 1024,
+          top_p: 1,
+          stream: false,
+          stop: null
         });
 
-        console.log('AI successfully generated response from data.');
-        return res.json({ success: true, data: { reply: completion.choices[0].message.content } });
+        console.log('Groq AI successfully generated response.');
+        return res.json({ success: true, data: { reply: chatCompletion.choices[0].message.content } });
       } catch (apiError) {
         console.error('Groq API Error Detail:', apiError);
-        return res.json({ success: true, data: { reply: "The AI Intelligence engine is momentarily unavailable. Please check your internet connection and ensure your Groq API key is valid." } });
+        return res.status(500).json({ success: false, error: "The AI Intelligence engine is momentarily unavailable. Please ensure your Groq API key is valid." });
       }
     }
 
-    // Fallback demo mode
-    const employees = await Employee.find();
-    const analyses = await AnalysisResult.find();
-    const lowerMessage = message.toLowerCase();
+    // Fallback demo mode if no API key
+    return res.json({
+      success: true,
+      data: { reply: "Groq API Key missing. Please provide GROQ_API_KEY in backend environment to enable live AI analysis." }
+    });
 
-    let reply = "I'm your AI Workforce Intelligence Assistant (Demo Mode). Provide an OPENAI_API_KEY for full conversational analysis.";
-
-    if (lowerMessage.includes('burnout') || lowerMessage.includes('fatigue')) {
-      const burnoutCount = analyses.filter(a => a.recommendation_type === 'burnout_risk').length;
-      reply = `Based on current analysis, ${burnoutCount} employees are flagged for burnout risk across the organization. Key indicators include overtime hours, workload intensity, and performance decline trends.`;
-    } else if (lowerMessage.includes('promotion') || lowerMessage.includes('candidate')) {
-      const promoCount = analyses.filter(a => a.recommendation_type === 'promotion_candidate').length;
-      reply = `Currently ${promoCount} employees are identified as promotion candidates based on fitment scores above 85/100.`;
-    } else if (lowerMessage.includes('underutilized') || lowerMessage.includes('utilization')) {
-      const underCount = analyses.filter(a => a.recommendation_type === 'underutilized').length;
-      reply = `${underCount} employees show utilization below 50%, suggesting they could take on additional process responsibilities or cross-training.`;
-    } else if (lowerMessage.includes('automation') || lowerMessage.includes('saving')) {
-      reply = `Automation potential analysis identifies repetitive, rule-based processes in F&A (Invoice Posting, Payment Processing) and PSS (DMS/Billdesk) as prime candidates for RPA implementation.`;
-    } else if (lowerMessage.includes('summary') || lowerMessage.includes('overview')) {
-      reply = `Workforce Overview: ${employees.length} employees across F&A, PSS, and SAP. Average fitment: ${analyses.length > 0 ? Math.round(analyses.reduce((s, a) => s + a.fitment_score, 0) / analyses.length) : 'N/A'}. Use the dashboard for detailed breakdowns by process area and band hierarchy.`;
-    }
-
-    res.json({ success: true, data: { reply } });
   } catch (err) {
     console.error('AI Chat Error:', err);
     res.status(500).json({ success: false, error: 'AI Processing Error.' });
   }
 };
+
