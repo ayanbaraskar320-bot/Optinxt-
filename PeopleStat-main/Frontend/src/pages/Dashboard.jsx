@@ -230,7 +230,7 @@ export default function Dashboard() {
 
       {/* ── METRIC DETAIL MODAL ── */}
       <Dialog open={!!selectedMetric} onOpenChange={() => setSelectedMetric(null)}>
-        <DialogContent style={{ borderRadius: "14px", border: "1px solid #E6E6E6", boxShadow: "0 20px 60px rgba(0,0,0,0.12)" }}>
+        <DialogContent style={{ borderRadius: "14px", border: "1px solid #E6E6E6", boxShadow: "0 20px 60px rgba(0,0,0,0.12)", maxHeight: "90vh", overflowY: "auto" }}>
           <DialogHeader>
             <DialogTitle style={{ color: "#2C2C2C", fontSize: "18px", fontWeight: 600 }}>
               {selectedMetric === 'workforce' && 'Workforce Overview'}

@@ -626,7 +626,7 @@ export default function WorkforceIntelligence() {
       </Sheet>
 
       <Dialog open={!!activeDialog} onOpenChange={() => setActiveDialog(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {activeDialog === 'skill-gap' && "Skill Gap Detail"}

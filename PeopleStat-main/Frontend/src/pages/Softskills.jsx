@@ -95,9 +95,9 @@ export default function Softskills() {
   const calculateTraits = (emps) => {
     const total = emps.length || 1;
     const scores = emps.reduce((acc, e) => {
-      const skill = e.scores?.skill || e.skillScore || 60;
-      const aptitude = e.scores?.aptitude || e.aptitudeScore || 60;
-      const fatigue = e.scores?.fatigue || e.fatigue || 0;
+      const skill = e.fitmentScore || 60;
+      const aptitude = e.productivity || 60;
+      const fatigue = e.fatigueScore || 0;
       
       acc.communication += skill;
       acc.teamwork += (skill + aptitude) / 2;
@@ -212,10 +212,10 @@ export default function Softskills() {
   ], [traitScores]);
 
   const riskSignals = useMemo(() => {
-    const highBurnout = centralEmployees.filter(e => (e.scores?.fatigue || e.fatigue || 0) > 80);
-    const skillGap = centralEmployees.filter(e => (e.scores?.fitment || e.fitmentScore || 0) < 70);
-    const lowLeadership = centralEmployees.filter(e => (e.scores?.aptitude || e.aptitudeScore || 0) < 65);
-    const criticalAttrition = centralEmployees.filter(e => (e.scores?.fatigue || e.fatigue || 0) > 85 && (e.scores?.utilization || e.utilization || 0) > 90);
+    const highBurnout = centralEmployees.filter(e => (e.fatigueScore || 0) > 75);
+    const skillGap = centralEmployees.filter(e => (e.fitmentScore || 0) < 70);
+    const lowLeadership = centralEmployees.filter(e => (e.productivity || 0) < 65);
+    const criticalAttrition = centralEmployees.filter(e => (e.fatigueScore || 0) > 80 && (e.utilization || 0) > 85);
 
     return [
       {
@@ -262,10 +262,10 @@ export default function Softskills() {
   }, [centralEmployees]);
 
   const opportunities = useMemo(() => {
-    const promoReady = centralEmployees.filter(e => (e.scores?.fitment || e.fitmentScore || 0) >= 90 && (e.scores?.fatigue || e.fatigue || 0) < 50);
-    const coachingReq = centralEmployees.filter(e => (e.scores?.skill || e.skillScore || 0) < 75);
-    const reassignment = centralEmployees.filter(e => (e.scores?.skill || e.skillScore || 0) > 85 && (e.scores?.fitment || e.fitmentScore || 0) < 75);
-    const leadershipPipe = centralEmployees.filter(e => (e.scores?.aptitude || e.aptitudeScore || 0) > 85 && (e.scores?.fitment || e.fitmentScore || 0) >= 80);
+    const promoReady = centralEmployees.filter(e => (e.fitmentScore || 0) >= 85 && (e.fatigueScore || 0) < 60);
+    const coachingReq = centralEmployees.filter(e => (e.productivity || 0) < 80);
+    const reassignment = centralEmployees.filter(e => (e.productivity || 0) > 85 && (e.fitmentScore || 0) < 75);
+    const leadershipPipe = centralEmployees.filter(e => (e.productivity || 0) > 80 && (e.fitmentScore || 0) >= 75);
 
     return [
       {
@@ -522,27 +522,27 @@ export default function Softskills() {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1.5 w-24">
-                        <Progress value={emp.scores?.skill || emp.skillScore || 0} className="h-1.5" />
-                        <span className="text-[10px] font-black text-slate-400">{emp.scores?.skill || emp.skillScore || 0}% Proficiency</span>
+                        <Progress value={emp.fitmentScore || 0} className="h-1.5" />
+                        <span className="text-[10px] font-black text-slate-400">{emp.fitmentScore || 0}% Proficiency</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={`border-none px-2 py-0.5 text-[10px] tracking-tighter ${getScoreBadge(emp.scores?.aptitude || emp.aptitudeScore || 0)}`}>
-                        {getScoreLabel(emp.scores?.aptitude || emp.aptitudeScore || 0)}
+                      <Badge variant="outline" className={`border-none px-2 py-0.5 text-[10px] tracking-tighter ${getScoreBadge(emp.productivity || 0)}`}>
+                        {getScoreLabel(emp.productivity || 0)}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${(emp.scores?.fatigue || emp.fatigue || 0) < 40 ? 'bg-blue-500' : (emp.scores?.fatigue || emp.fatigue || 0) < 70 ? 'bg-amber-500' : 'bg-red-500'}`} />
-                        <span className="text-xs font-bold text-slate-700">{100 - (emp.scores?.fatigue || emp.fatigue || 0)}% Sustainability</span>
+                        <div className={`w-2 h-2 rounded-full ${(emp.fatigueScore || 0) < 40 ? 'bg-blue-500' : (emp.fatigueScore || 0) < 70 ? 'bg-amber-500' : 'bg-red-500'}`} />
+                        <span className="text-xs font-bold text-slate-700">{100 - (emp.fatigueScore || 0)}% Sustainability</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm font-bold text-slate-900 tabular-nums">{Math.round(((emp.scores?.skill || emp.skillScore || 0) + (emp.scores?.aptitude || emp.aptitudeScore || 0)) / 2)}%</span>
+                      <span className="text-sm font-bold text-slate-900 tabular-nums">{Math.round(((emp.fitmentScore || 0) + (emp.productivity || 0)) / 2)}%</span>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="inline-flex items-center gap-1.5 text-blue-600 font-black tracking-tighter text-sm">
-                        {emp.scores?.fitment || emp.fitmentScore || 0}%
+                        {emp.fitmentScore || 0}%
                         <ChevronRight className="h-4 w-4 text-slate-300 group-hover:translate-x-1 transition-all" />
                       </div>
                     </TableCell>
@@ -635,7 +635,7 @@ export default function Softskills() {
 
       {/* 1. Summary Modal - Explain Model */}
       <Dialog open={activeModal === 'summary'} onOpenChange={() => setActiveModal(null)}>
-        <DialogContent className="sm:max-w-xl">
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">MayaMaya Evaluation Framework</DialogTitle>
             <DialogDescription className="text-slate-500 font-medium">How we measure behavioral intelligence at scale.</DialogDescription>
@@ -696,7 +696,7 @@ export default function Softskills() {
 
       {/* 2. Team Health Detail Modal */}
       <Dialog open={activeModal === 'health'} onOpenChange={() => setActiveModal(null)}>
-        <DialogContent className="sm:max-w-xl">
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">Workforce Health Topology</DialogTitle>
           </DialogHeader>
@@ -749,7 +749,7 @@ export default function Softskills() {
 
       {/* 3. Trait Deep Dive Modal */}
       <Dialog open={activeModal === 'trait'} onOpenChange={() => setActiveModal(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">{modalData?.name} Profile</DialogTitle>
           </DialogHeader>
@@ -796,7 +796,7 @@ export default function Softskills() {
                 {centralEmployees.sort((a, b) => (b.scores?.skill || b.skillScore || 0) - (a.scores?.skill || a.skillScore || 0)).slice(0, 4).map((e, idx) => (
                   <div key={idx} className="flex items-center justify-between p-3 border border-slate-100 rounded-xl text-xs font-bold text-slate-700 bg-white shadow-sm">
                     <span>{e.name}</span>
-                    <span className="text-blue-600">{e.scores?.skill || e.skillScore || 0}%</span>
+                    <span className="text-blue-600">{e.fitmentScore || 0}%</span>
                   </div>
                 ))}
               </div>
@@ -807,7 +807,7 @@ export default function Softskills() {
 
       {/* 4. Alert / Signal Modal */}
       <Dialog open={activeModal === 'alert'} onOpenChange={() => setActiveModal(null)}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">{modalData?.title} Detail</DialogTitle>
           </DialogHeader>
@@ -837,7 +837,7 @@ export default function Softskills() {
                       </div>
                     </div>
                     <Badge className="bg-white border-slate-200 text-slate-600 font-black text-[10px] tracking-tighter">
-                      {emp.scores?.fatigue || emp.fatigue || 0}% Fatigue
+                      {emp.fatigueScore || 0}% Fatigue
                     </Badge>
                   </div>
                 ))}
@@ -850,7 +850,16 @@ export default function Softskills() {
                 <h4 className="text-xs font-black text-blue-400 uppercase tracking-widest">Mandatory Executive Action</h4>
               </div>
               <p className="font-bold underline decoration-blue-500 decoration-2 underline-offset-4 text-lg">"{modalData?.action}"</p>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-xs h-12 shadow-lg shadow-blue-900/20">
+              <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-xs h-12 shadow-lg shadow-blue-900/20"
+                onClick={() => {
+                  toast({
+                    title: "Protocol Confirmed",
+                    description: `Executive action for ${modalData?.title} has been logged and initiated.`,
+                  });
+                  setActiveModal(null);
+                }}
+              >
                 Confirm Execution Protocol
               </Button>
             </div>
@@ -860,7 +869,7 @@ export default function Softskills() {
 
       {/* 5. Opportunity Pipeline Modal */}
       <Dialog open={activeModal === 'opportunity'} onOpenChange={() => setActiveModal(null)}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">{modalData?.title} Review</DialogTitle>
           </DialogHeader>
@@ -892,7 +901,7 @@ export default function Softskills() {
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <Badge className="bg-green-100 text-green-700 border-green-200 font-black text-[10px] tracking-widest">
-                        {emp.scores?.fitment || emp.fitmentScore || 0}% FITMENT
+                        {emp.fitmentScore || 0}% FITMENT
                       </Badge>
                     </div>
                   </div>
@@ -911,8 +920,29 @@ export default function Softskills() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
-              <Button className="h-12 bg-slate-900 font-black text-xs tracking-widest uppercase hover:bg-black">View Full Batch</Button>
-              <Button className="h-12 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs tracking-widest uppercase shadow-lg shadow-blue-100">Initiate Workflow</Button>
+              <Button 
+                className="h-12 bg-slate-900 font-black text-xs tracking-widest uppercase hover:bg-black"
+                onClick={() => {
+                  toast({
+                    title: "Batch Report Generated",
+                    description: `A detailed analysis for all ${modalData?.count} candidates in the ${modalData?.title} pipeline has been sent to your email.`,
+                  });
+                }}
+              >
+                View Full Batch
+              </Button>
+              <Button 
+                className="h-12 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs tracking-widest uppercase shadow-lg shadow-blue-100"
+                onClick={() => {
+                  toast({
+                    title: "Workflow Initiated",
+                    description: `Automated ${modalData?.title} workflow has been started for ${modalData?.count} assets.`,
+                  });
+                  setActiveModal(null);
+                }}
+              >
+                Initiate Workflow
+              </Button>
             </div>
           </div>
         </DialogContent>

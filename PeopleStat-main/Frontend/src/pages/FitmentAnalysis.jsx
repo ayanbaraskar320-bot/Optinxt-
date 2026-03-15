@@ -370,7 +370,16 @@ export default function FitmentAnalysis() {
                   <XAxis type="number" dataKey="fitment" name="Fitment %" unit="%" domain={[0, 100]} />
                   <YAxis type="number" dataKey="productivity" name="Productivity %" unit="%" domain={[0, 100]} />
                   <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                  <Scatter name="Employees" data={scatterData} fill="#8884d8" />
+                  <Scatter name="Employees" data={scatterData}>
+                    {scatterData.map((entry, index) => {
+                      let color = "#8884d8"; // Default
+                      if (entry.fitment >= 50 && entry.productivity >= 50) color = "#10b981"; // Stars
+                      else if (entry.fitment < 50 && entry.productivity >= 50) color = "#3b82f6"; // Hidden Gems
+                      else if (entry.fitment >= 50 && entry.productivity < 50) color = "#f59e0b"; // Misallocated
+                      else if (entry.fitment < 50 && entry.productivity < 50) color = "#ef4444"; // Exit/Reskill
+                      return <Cell key={`cell-${index}`} fill={color} />;
+                    })}
+                  </Scatter>
                 </ScatterChart>
               </ResponsiveContainer>
             </div>

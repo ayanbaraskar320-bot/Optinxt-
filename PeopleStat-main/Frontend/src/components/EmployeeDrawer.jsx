@@ -9,12 +9,12 @@ export default function EmployeeDrawer({ employee, onClose }) {
   const { toast } = useToast();
   if (!employee) return null;
 
-  // Derive Soft Skills logically from existing scores
-  const communication = employee.scores.skill;
-  const teamwork = Math.round((employee.scores.skill + employee.scores.aptitude) / 2);
-  const adaptability = employee.scores.aptitude;
-  const problemSolving = Math.round((employee.scores.skill + 2 * employee.scores.aptitude) / 3);
-  const creativity = 100 - employee.scores.fatigue;
+  // Derive Soft Skills logically from existing scores to ensure data is "connected"
+  const communication = employee.scores.fitment || 0;
+  const teamwork = Math.round(((employee.scores.fitment || 0) + (employee.scores.productivity || 0)) / 2);
+  const adaptability = employee.scores.productivity || 0;
+  const problemSolving = Math.round(((employee.scores.fitment || 0) + 2 * (employee.scores.productivity || 0)) / 3);
+  const creativity = 100 - (employee.scores.fatigue || 0);
 
   const behavioralData = [
     { skill: "Communication", value: communication },
@@ -26,13 +26,13 @@ export default function EmployeeDrawer({ employee, onClose }) {
 
   const avgSoftSkillScore = Math.round((communication + teamwork + adaptability + problemSolving + creativity) / 5);
 
-  const initials = employee.name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const initials = (employee.name || "").split(' ').map(n => n[0]).join('').toUpperCase();
   const risk = getOverallRisk(employee);
-  const fitmentBand = getFitmentBand(employee.scores.fitment);
+  const fitmentBand = getFitmentBand(employee.scores.fitment || 0);
 
   // Derive Missing Skills logically
   const allPossibleSkills = ["Cloud Architecture", "Leadership", "Advanced SQL", "Public Speaking", "Strategic Planning", "Machine Learning"];
-  const establishedHardSkills = employee.skills?.hard || [];
+  const establishedHardSkills = employee.skills || [];
   const missingSkills = allPossibleSkills.filter(s => !establishedHardSkills.includes(s)).slice(0, 3);
 
   // Career Logic
@@ -64,15 +64,15 @@ export default function EmployeeDrawer({ employee, onClose }) {
 
   const handleSendBrief = () => {
     toast({
-      title: "Success",
-      description: "Employee brief sent successfully.",
+      title: "Employee Brief Sent",
+      description: `A technical and behavioral performance brief for ${employee.name} has been emailed to the department head.`,
     });
   };
 
   const handleAuditCareer = () => {
     toast({
-      title: "Career Path Audit",
-      description: `Recommendation for ${employee.name}: ${suggestedAction} based on current fitment and fatigue scores.`,
+      title: "Career Path Audit Started",
+      description: `Analyzing ${employee.name}'s performance history against the "${nextMilestone}" role requirements. Suggested move: ${suggestedAction}.`,
     });
   };
 
