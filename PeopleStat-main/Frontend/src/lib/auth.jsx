@@ -28,7 +28,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   // REAL LOGIN — backend on port 5000 (matches .env PORT=5000)
-  const BACKEND_URL = "http://localhost:5000";
+  // BACKEND URL — use VITE_API_URL from environment or fallback to localhost
+  const BACKEND_URL = import.meta.env.VITE_API_URL 
+    ? import.meta.env.VITE_API_URL.replace('/api', '') 
+    : "http://localhost:5000";
 
   const login = async (usernameOrEmail, password) => {
     try {
