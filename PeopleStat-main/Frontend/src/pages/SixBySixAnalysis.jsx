@@ -50,10 +50,27 @@ export default function SixBySixAnalysis() {
     fetchData();
   }, [toast]);
 
+  // Helper to get color based on x (Potential) and y (Performance)
+  const getCellColor = (x, y) => {
+    const score = x + y;
+    // Elite Zone (Top Right)
+    if (x >= 5 && y >= 5) return "bg-emerald-500 text-white shadow-emerald-200";
+    if (x >= 4 && y >= 4) return "bg-blue-500 text-white shadow-blue-200";
+    // Strong/Top Performance but Low Potential
+    if (y >= 5 && x <= 2) return "bg-amber-500 text-white shadow-amber-200";
+    // High Potential but Low Performance
+    if (x >= 5 && y <= 2) return "bg-indigo-400 text-white shadow-indigo-200";
+    // Low/Emerging Zone (Bottom Left)
+    if (x <= 2 && y <= 2) return "bg-rose-500 text-white shadow-rose-200";
+    // Default/Stable Zone
+    return "bg-slate-400 text-white shadow-slate-200";
+  };
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <Zap className="animate-spin text-blue-600 h-10 w-10" />
+      <div className="flex flex-col items-center justify-center h-96 gap-4">
+        <div className="h-10 w-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-sm font-medium text-slate-500 animate-pulse">Generating Talent Matrix...</p>
       </div>
     );
   }
@@ -66,37 +83,59 @@ export default function SixBySixAnalysis() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">6├ù6 Talent Matrix</h1>
-          <p className="text-slate-500 text-sm">Strategic placement of workforce based on Potential and Performance</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">6x6 Talent Matrix</h1>
+          <p className="text-slate-500 text-sm font-medium">Strategic placement of workforce based on Potential and Performance</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <Card className="lg:col-span-3 border-slate-200 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-semibold uppercase tracking-wider text-slate-500">Talent Distribution Grid</CardTitle>
-            <Grid className="h-4 w-4 text-slate-400" />
+        <Card className="lg:col-span-3 border-slate-200 shadow-xl overflow-hidden bg-white">
+          <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-slate-50">
+            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Talent Distribution Grid</CardTitle>
+            <div className="flex items-center gap-4">
+               <div className="flex items-center gap-1.5">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Elite</span>
+               </div>
+               <div className="flex items-center gap-1.5">
+                  <div className="h-2 w-2 rounded-full bg-rose-500" />
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Critical</span>
+               </div>
+               <Grid className="h-4 w-4 text-slate-300 ml-2" />
+            </div>
           </CardHeader>
-          <CardContent className="pt-6">
-            <div className="flex">
+          <CardContent className="pt-8 pb-12 px-10">
+            <div className="flex gap-8">
               {/* Y-Axis labels */}
-              <div className="flex flex-col justify-between py-4 pr-4 h-[400px] text-[10px] font-bold text-slate-400 uppercase">
-                {labels.slice().reverse().map(l => <span key={l}>{l}</span>)}
+              <div className="flex flex-col justify-between py-2 text-[10px] font-black text-slate-300 uppercase h-[450px]">
+                {labels.slice().reverse().map(l => (
+                   <span key={l} className="flex items-center justify-end h-full last:h-auto">
+                     <span className="rotate-[-90deg] origin-center whitespace-nowrap">{l}</span>
+                   </span>
+                ))}
               </div>
 
-              {/* Matrix Grid */}
-              <div className="flex-1">
-                <div className="grid grid-cols-6 grid-rows-6 gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 h-[400px]">
+              {/* Matrix Container */}
+              <div className="flex-1 flex flex-col items-center">
+                 {/* Y Axis Title */}
+                <div className="relative w-full">
+                   <div className="absolute top-[225px] left-[-80px] -rotate-90 origin-center text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 whitespace-nowrap opacity-50">
+                     Performance Execution
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-6 grid-rows-6 gap-3 w-full bg-slate-50/50 p-4 rounded-2xl border-2 border-slate-100 h-[450px]">
                   {Array.from({ length: 36 }).map((_, i) => {
                     const rowIdx = Math.floor(i / 6);
                     const colIdx = i % 6;
                     const x = colIdx + 1; // Potential
                     const y = 6 - rowIdx; // Performance
                     
-                    const count = analysisResults.filter(r => r.matrix_x === x && r.matrix_y === y).length;
+                    const cellEmployees = analysisResults.filter(r => r.matrix_x === x && r.matrix_y === y);
+                    const count = cellEmployees.length;
                     const isActive = count > 0;
 
                     return (
@@ -104,36 +143,38 @@ export default function SixBySixAnalysis() {
                         key={i}
                         onClick={() => handleCellClick(x, y)}
                         className={cn(
-                          "flex items-center justify-center rounded-md text-sm font-bold transition-all",
+                          "relative flex flex-col items-center justify-center rounded-xl text-sm font-bold transition-all duration-300 group",
                           isActive 
-                            ? "bg-blue-600 text-white cursor-pointer hover:bg-blue-700 hover:scale-105 shadow-sm" 
-                            : "bg-white border border-slate-100 text-slate-200"
+                            ? `${getCellColor(x, y)} cursor-pointer hover:scale-[1.08] hover:z-10 shadow-lg` 
+                            : "bg-white/80 border border-slate-100 text-slate-100 hover:bg-white hover:border-slate-200"
                         )}
                       >
-                        {count > 0 ? count : ""}
+                        {isActive && (
+                          <>
+                            <span className="text-lg mb-0.5">{count}</span>
+                            <span className="text-[8px] opacity-70 uppercase tracking-tighter">Employees</span>
+                            {/* Subtle Pulse for high count cells */}
+                            {count > 10 && <div className="absolute inset-0 rounded-xl bg-current animate-ping opacity-10" />}
+                          </>
+                        )}
                       </div>
                     );
                   })}
                 </div>
                 
                 {/* X-Axis labels */}
-                <div className="flex justify-between mt-4 px-2 text-[10px] font-bold text-slate-400 uppercase">
+                <div className="flex justify-between w-full mt-6 px-2 text-[10px] font-black text-slate-300 uppercase tracking-widest">
                   {labels.map(l => <span key={l}>{l}</span>)}
                 </div>
                 
-                <div className="flex justify-center mt-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">
+                <div className="mt-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 opacity-50">
                   Potential Capability
                 </div>
-              </div>
-              
-              <div className="relative">
-                 <div className="absolute top-1/2 left-0 -translate-y-1/2 -rotate-90 origin-left text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 ml-[-450px]">
-                   Performance Execution
-                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
+d>
 
         <div className="space-y-6">
           <Card>

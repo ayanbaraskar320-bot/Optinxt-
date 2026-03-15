@@ -53,11 +53,12 @@ export const AIProvider = ({ children }) => {
   }, []);
 
   // Enhanced AI message processing with backend integration
-  const sendMessage = async (message) => {
+  const sendMessage = async (message, mode = 'workforce') => {
     setIsLoading(true);
+    console.log(`Sending AI message in mode: ${mode}`);
 
     try {
-      const response = await chatWithAI(message);
+      const response = await chatWithAI(message, mode);
       const aiReply = response.data.data.reply;
 
       // Extract employee mentions for UI cards

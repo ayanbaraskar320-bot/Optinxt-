@@ -41,11 +41,12 @@ export const runFitment = async (req, res) => {
 
 export const chatAssistant = async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, mode } = req.body;
+    const isCareerCoach = mode === 'career_coach';
 
     // If API key is available, use LLM
     const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
-    console.log('AI Assistant Triggered. Using Key Type:', process.env.GROQ_API_KEY ? 'GROQ' : 'OPENAI');
+    console.log(`AI Assistant Triggered (${mode || 'workforce'}). Using Key Type:`, process.env.GROQ_API_KEY ? 'GROQ' : 'OPENAI');
 
     if (apiKey) {
       const isGroq = !!process.env.GROQ_API_KEY;
@@ -60,7 +61,7 @@ export const chatAssistant = async (req, res) => {
       
       const [mentionedEmployee, generalAnalyses] = await Promise.all([
         nameRegex ? Employee.findOne({ name: { $regex: nameRegex } }) : null,
-        AnalysisResult.find().sort({ analysis_date: -1 }).limit(100).populate('employee_id', 'name band process_area')
+        AnalysisResult.find().sort({ analysis_date: -1 }).limit(100).populate('employee_id', 'name band process_area position skills')
       ]);
 
       console.log(`Context: Found ${generalAnalyses.length} analyses. Specific employee match: ${mentionedEmployee ? 'YES ('+mentionedEmployee.name+')' : 'NO'}`);
@@ -68,7 +69,7 @@ export const chatAssistant = async (req, res) => {
       // Build a rich text context for the AI
       let dataContext = "WORKFORCE DATA SNAPSHOT (Real-time):\n";
       generalAnalyses.forEach((a, i) => {
-        dataContext += `${i+1}. ${a.employee_id?.name || 'Unknown'}: Fitment=${a.fitment_score}%, Productivity=${a.productivity_score}%, Fatigue=${a.fatigue_score}%, Utilization=${a.utilization_score}%, Status=${a.recommendation_type}\n`;
+        dataContext += `${i+1}. ${a.employee_id?.name || 'Unknown'}: Role=${a.employee_id?.position || 'N/A'}, Fitment=${a.fitment_score}%, Productivity=${a.productivity_score}%, Fatigue=${a.fatigue_score}%, Status=${a.recommendation_type}\n`;
       });
 
       if (mentionedEmployee) {
@@ -82,12 +83,8 @@ export const chatAssistant = async (req, res) => {
         }
       }
 
-      try {
-        const completion = await openai.chat.completions.create({
-          messages: [
-            {
-              role: 'system',
-              content: `You are the OptiNXt Workforce Analyst. 
+      // Default Workforce prompt
+      let systemPrompt = `You are the OptiNXt Workforce Analyst. 
 Use the PROVIDED DATA below to answer questions about burnout, reskilling, underutilization, and individual performance.
 DO NOT use general knowledge. ONLY use the names and scores from the DATA CONTEXT.
 
@@ -97,12 +94,36 @@ ANSWER FORMAT:
 - For "Who is..." questions, list the top 5 relevant employees from the data.
 
 DATA CONTEXT:
-${dataContext}`,
+${dataContext}`;
+
+      // Career Coach prompt
+      if (isCareerCoach) {
+        systemPrompt = `You are the OptiNXt AI Career Coach. 
+An employee is talking to you about their career growth, fitment, and performance.
+Use the PROVIDED DATA below to give them personalized career advice, upskilling suggestions, and performance improvement tips.
+
+GUIDELINES:
+- Be encouraging, professional, and data-driven.
+- Refer to their specific scores (Fitment, Productivity, Fatigue).
+- If Fitment is low, suggest specific skills to learn based on their role.
+- If Fatigue is high, suggest workload management.
+- Frame everything around growth and professional development.
+
+DATA CONTEXT:
+${dataContext}`;
+      }
+
+      try {
+        const completion = await openai.chat.completions.create({
+          messages: [
+            {
+              role: 'system',
+              content: systemPrompt,
             },
             { role: 'user', content: message },
           ],
           model: 'llama-3.1-8b-instant', // Stable Groq model
-          temperature: 0,
+          temperature: 0.2, // Slightly higher for coach
           max_tokens: 800
         });
 

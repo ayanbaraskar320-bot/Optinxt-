@@ -18,11 +18,15 @@ import {
 } from "lucide-react";
 import { useAI } from "@/contexts/AIContext";
 
-const AIChat = ({ isFloating = false, isOpen = true, onToggle, suggestionTrigger }) => {
+const AIChat = ({ isFloating = false, isOpen = true, onToggle, suggestionTrigger, mode = 'workforce' }) => {
   const { messages, sendMessage, isLoading, clearChat } = useAI();
   const [inputMessage, setInputMessage] = useState("");
   const [isMinimized, setIsMinimized] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const isCareerCoach = mode === 'career_coach';
+  const chatTitle = isCareerCoach ? "AI Career Coach" : "AI Workforce Assistant";
+  const chatSubtitle = isCareerCoach ? "Personalized career growth and development insights" : "Ask questions about your team and get AI-powered insights";
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -91,7 +95,7 @@ const AIChat = ({ isFloating = false, isOpen = true, onToggle, suggestionTrigger
     setInputMessage("");
 
     // Send to AI
-    await sendMessage(inputMessage);
+    await sendMessage(inputMessage, mode);
   };
 
   const handleKeyPress = (e) => {
@@ -136,7 +140,7 @@ const AIChat = ({ isFloating = false, isOpen = true, onToggle, suggestionTrigger
                 <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: '#6D8196', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Brain size={14} style={{ color: '#FFFFE3' }} />
                 </div>
-                <span className="chat-title" style={{ fontWeight: 600, fontSize: '14px', color: '#FFFFFF' }}>AI Workforce Assistant</span>
+                <span className="chat-title" style={{ fontWeight: 600, fontSize: '14px', color: '#FFFFFF' }}>{chatTitle}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <button
@@ -267,8 +271,8 @@ const AIChat = ({ isFloating = false, isOpen = true, onToggle, suggestionTrigger
         <div className="flex items-center gap-3">
           <Brain className="h-5 w-5 text-blue-600" />
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">Workforce Intelligence Chat</h2>
-            <p className="text-sm text-slate-600">Ask questions about your team and get AI-powered insights</p>
+            <h2 className="text-lg font-semibold text-slate-900">{chatTitle}</h2>
+            <p className="text-sm text-slate-600">{chatSubtitle}</p>
           </div>
         </div>
         <Button variant="outline" size="sm" onClick={clearChat} className="border-slate-200">

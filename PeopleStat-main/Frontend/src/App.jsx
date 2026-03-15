@@ -52,6 +52,7 @@ import SkillsLearning from "./pages/employee/SkillsLearning.jsx";
 import FatigueWellbeing from "./pages/employee/FatigueWellbeing.jsx";
 import CareerGrowth from "./pages/employee/CareerGrowth.jsx";
 import EmployeeNotifications from "./pages/employee/EmployeeNotifications.jsx";
+import CareerCoach from "./pages/employee/CareerCoach.jsx";
 
 
 /* ---------------- PROTECTED ROUTES ---------------- */
@@ -168,6 +169,7 @@ function AppRouter() {
       <Route path="/employee/skills" component={() => <ProtectedRoute component={SkillsLearning} />} />
       <Route path="/employee/wellbeing" component={() => <ProtectedRoute component={FatigueWellbeing} />} />
       <Route path="/employee/career" component={() => <ProtectedRoute component={CareerGrowth} />} />
+      <Route path="/employee/career-coach" component={() => <ProtectedRoute component={CareerCoach} />} />
       <Route path="/employee/notifications" component={() => <ProtectedRoute component={EmployeeNotifications} />} />
 
       <Route component={NotFound} />
@@ -208,14 +210,7 @@ function AppContent() {
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               <div className="h-6 w-px bg-slate-200" />
-              <div className="flex items-center gap-2">
-                <OptiNXtLogo variant="full" size="sm" style={{ gap: 4 }} />
-                {user && (
-                    <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100 transition-colors uppercase text-[10px] font-bold tracking-wider px-2 py-0.5">
-                        {user.role === "manager" ? "Manager" : "Employee"}
-                    </Badge>
-                )}
-              </div>
+              <div className="flex items-center gap-2" />
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
@@ -227,26 +222,6 @@ function AppContent() {
                     <TooltipContent side="bottom">Notifications (F8)</TooltipContent>
                 </Tooltip>
 
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <ThemeToggle />
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">Toggle Theme</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setIsChatOpen(!isChatOpen)}
-                            className={cn("transition-colors", isChatOpen ? "bg-blue-50 text-blue-600" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}
-                        >
-                            <Bot className="h-5 w-5" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">AI Copilot</TooltipContent>
-                </Tooltip>
 
                 <Tooltip>
                     <TooltipTrigger asChild>

@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { 
   Brain, Award, BookOpen, ChevronRight, Target, 
-  Star, StarHalf, Loader2, Sparkles, TrendingUp
+  Star, StarHalf, Loader2, Sparkles, TrendingUp, Clock
 } from "lucide-react";
 
 export default function SkillsLearning() {
@@ -39,7 +39,24 @@ export default function SkillsLearning() {
     );
   }
 
-  if (!data) return null;
+  if (!data) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+        <div className="p-4 bg-slate-50 rounded-full">
+          <Brain className="h-10 w-10 text-slate-300" />
+        </div>
+        <p className="text-slate-500 font-medium text-center max-w-xs">
+          Skills intelligence is being calculated. Please check back shortly or update your profile data.
+        </p>
+      </div>
+    );
+  }
+
+  // Pre-process data for safety
+  const currentSkills = data.currentSkills || [];
+  const requiredSkills = data.requiredSkills || [];
+  const skillGaps = data.skillGaps || [];
+  const recommendations = data.recommendations || [];
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
@@ -73,7 +90,7 @@ export default function SkillsLearning() {
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-6">
-              {data.currentSkills.map((skill) => (
+              {currentSkills.map((skill) => (
                 <div key={skill.name} className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-bold text-slate-700">{skill.name}</span>
@@ -105,8 +122,8 @@ export default function SkillsLearning() {
             <div>
               <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.15em] mb-4">Required Skills for Your Role</h4>
               <div className="flex flex-wrap gap-2">
-                {data.requiredSkills.map(skill => {
-                  const isOwned = data.currentSkills.some(s => s.name.toLowerCase() === skill.toLowerCase());
+                {requiredSkills.map(skill => {
+                  const isOwned = currentSkills.some(s => s.name.toLowerCase() === skill.toLowerCase());
                   return (
                     <Badge 
                       key={skill} 
@@ -131,8 +148,8 @@ export default function SkillsLearning() {
                 Growth Insight
               </h3>
               <p className="text-blue-100 text-sm leading-relaxed relative z-10">
-                You have {data.skillGaps.length} critical skill gaps for your current role. 
-                Focusing on these will improve your role fitment from <span className="font-bold text-white">{data.fitmentScore}%</span> to over <span className="font-bold text-white">90%</span>.
+                You have {skillGaps.length} critical skill gaps for your current role. 
+                Focusing on these will improve your role fitment from <span className="font-bold text-white">{data.fitmentScore || 0}%</span> to over <span className="font-bold text-white">90%</span>.
               </p>
             </div>
           </CardContent>
@@ -146,7 +163,7 @@ export default function SkillsLearning() {
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {data.recommendations.map((rec, i) => (
+        {recommendations.map((rec, i) => (
           <Card key={i} className="hover:shadow-xl transition-all duration-300 border-none ring-1 ring-slate-100 overflow-hidden group">
             <div className="h-2 bg-blue-600 w-full" />
             <CardContent className="p-6">

@@ -18,6 +18,7 @@ import {
   Layers,
   Rocket,
   Bell,
+  Sparkles,
 } from "lucide-react";
 
 import {
@@ -42,10 +43,10 @@ import OptiNXtLogo from "./OptiNXtLogo.jsx";
 
 const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Employees", url: "/employees", icon: Users },
 ];
 
 const insightsItems = [
+  { title: "Employees", url: "/employees", icon: Users },
   { title: "Fitment Analysis", url: "/fitment", icon: Target },
   { title: "Softskills", url: "/softskills", icon: Brain },
   { title: "Fatigue Analysis", url: "/fatigue", icon: AlertCircle },
@@ -93,21 +94,6 @@ export function AppSidebar() {
         <div style={{ paddingBottom: 4 }}>
           <OptiNXtLogo variant="full" size="sm" />
         </div>
-
-        {/* USER BLOCK */}
-        {user && (
-          <div className="mt-8 mb-4 p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3">
-            <Avatar className="h-9 w-9 border border-white/10">
-              <AvatarFallback className="bg-sidebar-accent text-white text-xs">
-                {user.username?.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-bold text-white truncate">{user.username}</span>
-              <span className="text-[10px] text-sidebar-foreground/50 capitalize font-medium">{user.role}</span>
-            </div>
-          </div>
-        )}
       </SidebarHeader>
 
       <SidebarContent className="px-3">
@@ -135,9 +121,10 @@ export function AppSidebar() {
                   <NavItem item={{ title: "Skills & Learning", url: "/employee/skills", icon: Brain }} />
                   <NavItem item={{ title: "Fatigue & Wellbeing", url: "/employee/wellbeing", icon: AlertCircle }} />
                   <NavItem item={{ title: "Career Growth", url: "/employee/career", icon: Rocket }} />
+                  <NavItem item={{ title: "AI Career Coach", url: "/employee/career-coach", icon: Sparkles }} />
+                  <NavItem item={{ title: "Employee Data Form", url: "/employee/data-form", icon: ClipboardList }} />
                   <NavItem item={{ title: "Notifications", url: "/employee/notifications", icon: Bell }} />
                   <NavItem item={{ title: "Settings", url: "/settings", icon: Settings }} />
-                  <NavItem item={{ title: "Employee Data Form", url: "/employee/data-form", icon: ClipboardList }} />
                 </>
               ) : (
                 insightsItems.map((item) => <NavItem key={item.title} item={item} />)

@@ -253,7 +253,7 @@ export default function EmployeeDashboard() {
                             </ul>
                         </div>
 
-                        <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={() => go("/ai-assistant")}>
+                        <Button className="w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-6 rounded-xl shadow-lg shadow-indigo-200 transition-all hover:scale-[1.02]" onClick={() => go("/employee/career-coach")}>
                             Chat with AI Career Coach
                         </Button>
                     </CardContent>
