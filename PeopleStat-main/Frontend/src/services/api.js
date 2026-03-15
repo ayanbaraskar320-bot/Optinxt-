@@ -30,6 +30,7 @@ export const runAnalysis = (params) => api.post("/analysis/run", null, { params 
 export const fetchAnalysisResults = (params) => api.get("/analysis/results", { params });
 export const fetchAnalysisSummary = () => api.get("/analysis/summary");
 export const fetchEmployeeAnalysis = (id) => api.get(`/analysis/employee/${id}`);
+export const chatWithAI = (message) => api.post("/analysis/chat", { message });
 
 // ─── Optimization APIs ─────────────────────────
 export const fetchOptimizationRecommendations = () => api.get("/optimization/recommendations");

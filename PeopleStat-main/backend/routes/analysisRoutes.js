@@ -1,5 +1,6 @@
 import express from 'express';
 import { runAnalysis, getAnalysisResults, getEmployeeAnalysis, getAnalysisSummary } from '../controllers/analysisController.js';
+import { chatAssistant } from '../controllers/aiController.js';
 import { protect, managerOnly } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -18,5 +19,8 @@ router.get('/summary', getAnalysisSummary);
 
 // GET /api/analysis/employee/:id — Get specific employee analysis
 router.get('/employee/:id', getEmployeeAnalysis);
+
+// POST /api/analysis/chat — AI workforce assistant
+router.post('/chat', chatAssistant);
 
 export default router;

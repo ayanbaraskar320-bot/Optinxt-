@@ -43,36 +43,75 @@ export const chatAssistant = async (req, res) => {
   try {
     const { message } = req.body;
 
-    // If OpenAI API key is available, use GPT
-    if (process.env.OPENAI_API_KEY) {
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      const employees = await Employee.find().limit(20);
-      const analyses = await AnalysisResult.find().limit(20).populate('employee_id', 'name band process_area');
+    // If API key is available, use LLM
+    const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+    console.log('AI Assistant Triggered. Using Key Type:', process.env.GROQ_API_KEY ? 'GROQ' : 'OPENAI');
 
-      const context = analyses.map(a => ({
-        name: a.employee_id?.name,
-        band: a.employee_id?.band,
-        process: a.employee_id?.process_area,
-        fitment: a.fitment_score,
-        productivity: a.productivity_score,
-        fatigue: a.fatigue_score,
-        recommendation: a.recommendation_type,
-      }));
-
-      const completion = await openai.chat.completions.create({
-        messages: [
-          {
-            role: 'system',
-            content: `You are an AI Workforce Intelligence Assistant for an enterprise platform analyzing employee performance across F&A, PSS, and SAP processes. 
-Current workforce context (sample): ${JSON.stringify(context.slice(0, 10))}
-Total workforce: ${employees.length} employees. 
-Help managers make data-driven decisions about workforce optimization, role fitment, fatigue risk, and automation opportunities.`,
-          },
-          { role: 'user', content: message },
-        ],
-        model: 'gpt-3.5-turbo',
+    if (apiKey) {
+      const isGroq = !!process.env.GROQ_API_KEY;
+      const openai = new OpenAI({ 
+        apiKey: apiKey,
+        baseURL: isGroq ? "https://api.groq.com/openai/v1" : undefined
       });
-      return res.json({ success: true, data: { reply: completion.choices[0].message.content } });
+
+      // POWERFUL CONTEXT FETCHING (Top 100 analysis results to answer general questions)
+      const words = message.replace(/[?!.]/g, '').split(' ').filter(w => w.length > 2);
+      const nameRegex = words.length > 0 ? new RegExp(words.join('|'), 'i') : null;
+      
+      const [mentionedEmployee, generalAnalyses] = await Promise.all([
+        nameRegex ? Employee.findOne({ name: { $regex: nameRegex } }) : null,
+        AnalysisResult.find().sort({ analysis_date: -1 }).limit(100).populate('employee_id', 'name band process_area')
+      ]);
+
+      console.log(`Context: Found ${generalAnalyses.length} analyses. Specific employee match: ${mentionedEmployee ? 'YES ('+mentionedEmployee.name+')' : 'NO'}`);
+
+      // Build a rich text context for the AI
+      let dataContext = "WORKFORCE DATA SNAPSHOT (Real-time):\n";
+      generalAnalyses.forEach((a, i) => {
+        dataContext += `${i+1}. ${a.employee_id?.name || 'Unknown'}: Fitment=${a.fitment_score}%, Productivity=${a.productivity_score}%, Fatigue=${a.fatigue_score}%, Utilization=${a.utilization_score}%, Status=${a.recommendation_type}\n`;
+      });
+
+      if (mentionedEmployee) {
+        const analysis = await AnalysisResult.findOne({ employee_id: mentionedEmployee._id }).sort({ analysis_date: -1 });
+        if (analysis) {
+          dataContext += `\nCRITICAL FOCUS: DATA FOR ${mentionedEmployee.name.toUpperCase()}:\n`;
+          dataContext += `- Role: ${mentionedEmployee.position}, Band: ${mentionedEmployee.band}, Process: ${mentionedEmployee.process_area}\n`;
+          dataContext += `- Precise Scores: Fitment: ${analysis.fitment_score}/100, Performance: ${analysis.productivity_score}%, Fatigue: ${analysis.fatigue_score}%\n`;
+          dataContext += `- System Recommendation: ${analysis.recommendation}\n`;
+          dataContext += `- Skill Breakdown: ${JSON.stringify(analysis.details)}\n`;
+        }
+      }
+
+      try {
+        const completion = await openai.chat.completions.create({
+          messages: [
+            {
+              role: 'system',
+              content: `You are the OptiNXt Workforce Analyst. 
+Use the PROVIDED DATA below to answer questions about burnout, reskilling, underutilization, and individual performance.
+DO NOT use general knowledge. ONLY use the names and scores from the DATA CONTEXT.
+
+ANSWER FORMAT:
+- Be specific. Mention names and exact percentages.
+- For individual analysis (like Sarah Johnson), provide a detailed Fitment & Risk assessment.
+- For "Who is..." questions, list the top 5 relevant employees from the data.
+
+DATA CONTEXT:
+${dataContext}`,
+            },
+            { role: 'user', content: message },
+          ],
+          model: 'llama-3.1-8b-instant', // Stable Groq model
+          temperature: 0,
+          max_tokens: 800
+        });
+
+        console.log('AI successfully generated response from data.');
+        return res.json({ success: true, data: { reply: completion.choices[0].message.content } });
+      } catch (apiError) {
+        console.error('Groq API Error Detail:', apiError);
+        return res.json({ success: true, data: { reply: "The AI Intelligence engine is momentarily unavailable. Please check your internet connection and ensure your Groq API key is valid." } });
+      }
     }
 
     // Fallback demo mode
