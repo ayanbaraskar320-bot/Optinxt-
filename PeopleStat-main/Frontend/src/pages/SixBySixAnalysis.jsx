@@ -50,20 +50,31 @@ export default function SixBySixAnalysis() {
     fetchData();
   }, [toast]);
 
-  // Helper to get color based on x (Potential) and y (Performance)
-  const getCellColor = (x, y) => {
-    const score = x + y;
-    // Elite Zone (Top Right)
-    if (x >= 5 && y >= 5) return "bg-emerald-500 text-white shadow-emerald-200";
-    if (x >= 4 && y >= 4) return "bg-blue-500 text-white shadow-blue-200";
-    // Strong/Top Performance but Low Potential
-    if (y >= 5 && x <= 2) return "bg-amber-500 text-white shadow-amber-200";
-    // High Potential but Low Performance
-    if (x >= 5 && y <= 2) return "bg-indigo-400 text-white shadow-indigo-200";
-    // Low/Emerging Zone (Bottom Left)
-    if (x <= 2 && y <= 2) return "bg-rose-500 text-white shadow-rose-200";
-    // Default/Stable Zone
-    return "bg-slate-400 text-white shadow-slate-200";
+
+
+  // Calculate Max Count for Heat Map
+  const maxCount = useMemo(() => {
+    let max = 0;
+    for (let x = 1; x <= 6; x++) {
+      for (let y = 1; y <= 6; y++) {
+        const count = analysisResults.filter(r => r.matrix_x === x && r.matrix_y === y).length;
+        if (count > max) max = count;
+      }
+    }
+    return max || 1;
+  }, [analysisResults]);
+
+  // Helper to get color based on count (Heat Map style)
+  const getCellColor = (count) => {
+    if (count === 0) return "bg-slate-50/50 border border-slate-100 text-slate-100";
+    
+    // Professional Scale: Slate to Deep Blue
+    const ratio = count / maxCount;
+    if (ratio < 0.2) return "bg-slate-200 text-slate-700 border-slate-300";
+    if (ratio < 0.4) return "bg-blue-100 text-blue-800 border-blue-200";
+    if (ratio < 0.6) return "bg-blue-300 text-blue-900 border-blue-400";
+    if (ratio < 0.8) return "bg-blue-600 text-white border-blue-700";
+    return "bg-indigo-900 text-white border-indigo-950";
   };
 
   if (isLoading) {
@@ -97,23 +108,23 @@ export default function SixBySixAnalysis() {
             <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Talent Distribution Grid</CardTitle>
             <div className="flex items-center gap-4">
                <div className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Elite</span>
+                  <div className="h-2 w-2 rounded-full bg-emerald-600" />
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">High Density</span>
                </div>
                <div className="flex items-center gap-1.5">
                   <div className="h-2 w-2 rounded-full bg-rose-500" />
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Critical</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Low Density</span>
                </div>
                <Grid className="h-4 w-4 text-slate-300 ml-2" />
             </div>
           </CardHeader>
           <CardContent className="pt-8 pb-12 px-10">
-            <div className="flex gap-8">
+            <div className="flex gap-x-16">
               {/* Y-Axis labels */}
-              <div className="flex flex-col justify-between py-2 text-[10px] font-black text-slate-300 uppercase h-[450px]">
-                {labels.slice().reverse().map(l => (
-                   <span key={l} className="flex items-center justify-end h-full last:h-auto">
-                     <span className="rotate-[-90deg] origin-center whitespace-nowrap">{l}</span>
+              <div className="flex flex-col justify-between py-2 text-[10px] font-black text-slate-300 uppercase h-[450px] min-w-[60px]">
+                {labels.slice().reverse().map((l, idx) => (
+                   <span key={l} className="flex items-center justify-end h-full font-bold text-slate-400 pr-3 border-r border-slate-100">
+                     {l}
                    </span>
                 ))}
               </div>
@@ -122,12 +133,12 @@ export default function SixBySixAnalysis() {
               <div className="flex-1 flex flex-col items-center">
                  {/* Y Axis Title */}
                 <div className="relative w-full">
-                   <div className="absolute top-[225px] left-[-80px] -rotate-90 origin-center text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 whitespace-nowrap opacity-50">
+                   <div className="absolute top-[225px] left-[-180px] -rotate-90 origin-center text-[10px] font-black uppercase tracking-[0.4em] text-slate-300 whitespace-nowrap opacity-70">
                      Performance Execution
                    </div>
                 </div>
 
-                <div className="grid grid-cols-6 grid-rows-6 gap-3 w-full bg-slate-50/50 p-4 rounded-2xl border-2 border-slate-100 h-[450px]">
+                <div className="grid grid-cols-6 grid-rows-6 gap-2 w-full bg-slate-50/30 p-4 rounded-none border border-slate-100 h-[450px]">
                   {Array.from({ length: 36 }).map((_, i) => {
                     const rowIdx = Math.floor(i / 6);
                     const colIdx = i % 6;
@@ -143,10 +154,10 @@ export default function SixBySixAnalysis() {
                         key={i}
                         onClick={() => handleCellClick(x, y)}
                         className={cn(
-                          "relative flex flex-col items-center justify-center rounded-xl text-sm font-bold transition-all duration-300 group",
+                          "relative flex flex-col items-center justify-center rounded-none text-sm font-bold transition-all duration-300 group border-2",
                           isActive 
-                            ? `${getCellColor(x, y)} cursor-pointer hover:scale-[1.08] hover:z-10 shadow-lg` 
-                            : "bg-white/80 border border-slate-100 text-slate-100 hover:bg-white hover:border-slate-200"
+                            ? `${getCellColor(count)} cursor-pointer hover:z-10 shadow-md` 
+                            : "bg-white/80 border-slate-100 text-slate-100 hover:bg-white hover:border-slate-200"
                         )}
                       >
                         {isActive && (
@@ -154,7 +165,7 @@ export default function SixBySixAnalysis() {
                             <span className="text-lg mb-0.5">{count}</span>
                             <span className="text-[8px] opacity-70 uppercase tracking-tighter">Employees</span>
                             {/* Subtle Pulse for high count cells */}
-                            {count > 10 && <div className="absolute inset-0 rounded-xl bg-current animate-ping opacity-10" />}
+                            {count > maxCount * 0.8 && <div className="absolute inset-0 rounded-none bg-current animate-ping opacity-10" />}
                           </>
                         )}
                       </div>
@@ -163,11 +174,15 @@ export default function SixBySixAnalysis() {
                 </div>
                 
                 {/* X-Axis labels */}
-                <div className="flex justify-between w-full mt-6 px-2 text-[10px] font-black text-slate-300 uppercase tracking-widest">
-                  {labels.map(l => <span key={l}>{l}</span>)}
+                <div className="flex justify-between w-full mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                  {labels.map(l => (
+                    <span key={l} className="flex-1 text-center border-t border-slate-100 pt-3">
+                      {l}
+                    </span>
+                  ))}
                 </div>
                 
-                <div className="mt-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 opacity-50">
+                <div className="mt-8 text-[10px] font-black uppercase tracking-[0.5em] text-slate-300 opacity-80">
                   Potential Capability
                 </div>
               </div>

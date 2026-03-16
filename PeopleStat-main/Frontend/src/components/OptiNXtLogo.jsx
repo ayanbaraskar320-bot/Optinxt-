@@ -15,8 +15,8 @@ export default function OptiNXtLogo({
   style = {},
   onClick,
 }) {
-  const iconSizes = { sm: 28, md: 40, lg: 60, xl: 100 };
-  const fontSizes = { sm: 16, md: 22, lg: 32, xl: 52 };
+  const iconSizes = { sm: 40, md: 40, lg: 60, xl: 100 };
+  const fontSizes = { sm: 25, md: 22, lg: 32, xl: 52 };
   const iconPx = iconSizes[size] ?? 40;
   const fontPx = fontSizes[size] ?? 22;
 

@@ -167,6 +167,14 @@ export default function Settings() {
               >
                 Data Processing
               </Button>
+              <Button
+                variant={activeTab === "profile" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveTab("profile")}
+                className="rounded-full"
+              >
+                My Profile
+              </Button>
             </div>
           </div>
         </div>
@@ -459,6 +467,12 @@ export default function Settings() {
               </CardContent>
             </Card>
           </div>
+        )}
+
+        {activeTab === "profile" && (
+           <div className="-mt-8 -mx-6">
+              <EmployeeSettings user={user} />
+           </div>
         )}
       </div>
     </div>

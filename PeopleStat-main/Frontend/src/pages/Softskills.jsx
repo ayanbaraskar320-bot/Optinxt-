@@ -79,6 +79,20 @@ export default function Softskills() {
     loadEmployees();
   }, [toast]);
 
+  const handleExport = (data, filename = "export.csv") => {
+    if (!data || data.length === 0) return;
+    const headers = Object.keys(data[0]).join(",");
+    const rows = data.map(obj => Object.values(obj).join(",")).join("\n");
+    const blob = new Blob([`${headers}\n${rows}`], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    toast({ title: "Export Successful", description: `Data saved to ${filename}` });
+  };
+
   const centralEmployees = useMemo(() => {
     if (isEmployee) {
       return employees.filter(e => e.employeeId === user?.employeeId);
@@ -95,9 +109,9 @@ export default function Softskills() {
   const calculateTraits = (emps) => {
     const total = emps.length || 1;
     const scores = emps.reduce((acc, e) => {
-      const skill = e.fitmentScore || 60;
-      const aptitude = e.productivity || 60;
-      const fatigue = e.fatigueScore || 0;
+      const skill = e.fitmentScore || e.scores?.fitment || 60;
+      const aptitude = e.productivity || e.scores?.productivity || 60;
+      const fatigue = e.fatigueScore || e.scores?.fatigue || 0;
       
       acc.communication += skill;
       acc.teamwork += (skill + aptitude) / 2;
@@ -212,10 +226,10 @@ export default function Softskills() {
   ], [traitScores]);
 
   const riskSignals = useMemo(() => {
-    const highBurnout = centralEmployees.filter(e => (e.fatigueScore || 0) > 75);
-    const skillGap = centralEmployees.filter(e => (e.fitmentScore || 0) < 70);
-    const lowLeadership = centralEmployees.filter(e => (e.productivity || 0) < 65);
-    const criticalAttrition = centralEmployees.filter(e => (e.fatigueScore || 0) > 80 && (e.utilization || 0) > 85);
+    const highBurnout = centralEmployees.filter(e => (e.fatigueScore || e.scores?.fatigue || 0) > 75);
+    const skillGap = centralEmployees.filter(e => (e.fitmentScore || e.scores?.fitment || 0) < 70);
+    const lowLeadership = centralEmployees.filter(e => (e.productivity || e.scores?.productivity || 0) < 65);
+    const criticalAttrition = centralEmployees.filter(e => (e.fatigueScore || e.scores?.fatigue || 0) > 80 && (e.utilization || e.scores?.utilization || 0) > 85);
 
     return [
       {
@@ -262,10 +276,10 @@ export default function Softskills() {
   }, [centralEmployees]);
 
   const opportunities = useMemo(() => {
-    const promoReady = centralEmployees.filter(e => (e.fitmentScore || 0) >= 85 && (e.fatigueScore || 0) < 60);
-    const coachingReq = centralEmployees.filter(e => (e.productivity || 0) < 80);
-    const reassignment = centralEmployees.filter(e => (e.productivity || 0) > 85 && (e.fitmentScore || 0) < 75);
-    const leadershipPipe = centralEmployees.filter(e => (e.productivity || 0) > 80 && (e.fitmentScore || 0) >= 75);
+    const promoReady = centralEmployees.filter(e => (e.fitmentScore || e.scores?.fitment || 0) >= 85 && (e.fatigueScore || e.scores?.fatigue || 0) < 60);
+    const coachingReq = centralEmployees.filter(e => (e.productivity || e.scores?.productivity || 0) < 80);
+    const reassignment = centralEmployees.filter(e => (e.productivity || e.scores?.productivity || 0) > 85 && (e.fitmentScore || e.scores?.fitment || 0) < 75);
+    const leadershipPipe = centralEmployees.filter(e => (e.productivity || e.scores?.productivity || 0) > 80 && (e.fitmentScore || e.scores?.fitment || 0) >= 75);
 
     return [
       {
@@ -343,6 +357,15 @@ export default function Softskills() {
             <p className="text-slate-500 mt-1">Behavioral assessment and cognitive performance analytics</p>
           </div>
           <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 border-slate-200 text-slate-600 font-bold hover:bg-slate-50 gap-2"
+                  onClick={() => handleExport(centralEmployees, "soft-skills-analysis.csv")}
+                >
+                  <Download className="h-4 w-4" />
+                  Export CSV
+                </Button>
             <Button variant="outline" className="border-slate-200 bg-white shadow-sm" onClick={() => setActiveModal('summary')}>
               <Brain className="mr-2 h-4 w-4 text-blue-600" />
               Explain Model
@@ -522,13 +545,13 @@ export default function Softskills() {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1.5 w-24">
-                        <Progress value={emp.fitmentScore || 0} className="h-1.5" />
-                        <span className="text-[10px] font-black text-slate-400">{emp.fitmentScore || 0}% Proficiency</span>
+                        <Progress value={emp.communication || emp.fitmentScore || 0} className="h-1.5" />
+                        <span className="text-[10px] font-black text-slate-400">{emp.communication || emp.fitmentScore || 0}% Proficiency</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={`border-none px-2 py-0.5 text-[10px] tracking-tighter ${getScoreBadge(emp.productivity || 0)}`}>
-                        {getScoreLabel(emp.productivity || 0)}
+                      <Badge variant="outline" className={`border-none px-2 py-0.5 text-[10px] tracking-tighter ${getScoreBadge(emp.teamwork || emp.productivity || 0)}`}>
+                        {getScoreLabel(emp.teamwork || emp.productivity || 0)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -538,7 +561,7 @@ export default function Softskills() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm font-bold text-slate-900 tabular-nums">{Math.round(((emp.fitmentScore || 0) + (emp.productivity || 0)) / 2)}%</span>
+                      <span className="text-sm font-bold text-slate-900 tabular-nums">{emp.adaptability || Math.round(((emp.fitmentScore || 0) + (emp.productivity || 0)) / 2)}%</span>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="inline-flex items-center gap-1.5 text-blue-600 font-black tracking-tighter text-sm">
@@ -793,10 +816,10 @@ export default function Softskills() {
             <div className="pt-2">
               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Focus Individuals</h4>
               <div className="grid grid-cols-2 gap-2">
-                {centralEmployees.sort((a, b) => (b.scores?.skill || b.skillScore || 0) - (a.scores?.skill || a.skillScore || 0)).slice(0, 4).map((e, idx) => (
+                {centralEmployees.sort((a, b) => (b.fitmentScore || b.scores?.fitment || 0) - (a.fitmentScore || a.scores?.fitment || 0)).slice(0, 4).map((e, idx) => (
                   <div key={idx} className="flex items-center justify-between p-3 border border-slate-100 rounded-xl text-xs font-bold text-slate-700 bg-white shadow-sm">
                     <span>{e.name}</span>
-                    <span className="text-blue-600">{e.fitmentScore || 0}%</span>
+                    <span className="text-blue-600">{e.fitmentScore || e.scores?.fitment || 0}%</span>
                   </div>
                 ))}
               </div>

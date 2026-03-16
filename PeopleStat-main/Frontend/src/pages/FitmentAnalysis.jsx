@@ -14,6 +14,7 @@ import { useAuth } from "@/lib/auth";
 import { api } from "@/services/api";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 export default function FitmentAnalysis() {
   const { user } = useAuth();

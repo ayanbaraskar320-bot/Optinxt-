@@ -9,12 +9,12 @@ export default function EmployeeDrawer({ employee, onClose }) {
   const { toast } = useToast();
   if (!employee) return null;
 
-  // Derive Soft Skills logically from existing scores to ensure data is "connected"
-  const communication = employee.scores.fitment || 0;
-  const teamwork = Math.round(((employee.scores.fitment || 0) + (employee.scores.productivity || 0)) / 2);
-  const adaptability = employee.scores.productivity || 0;
-  const problemSolving = Math.round(((employee.scores.fitment || 0) + 2 * (employee.scores.productivity || 0)) / 3);
-  const creativity = 100 - (employee.scores.fatigue || 0);
+  // Use database fields with fallbacks
+  const communication = employee.communication || employee.fitmentScore || 60;
+  const teamwork = employee.teamwork || Math.round(((employee.fitmentScore || 60) + (employee.productivity || 60)) / 2);
+  const adaptability = employee.adaptability || employee.productivity || 60;
+  const problemSolving = employee.problemSolving || Math.round((communication + 2 * (employee.productivity || 60)) / 3);
+  const creativity = employee.creativity || (100 - (employee.fatigueScore || 0));
 
   const behavioralData = [
     { skill: "Communication", value: communication },
@@ -77,12 +77,12 @@ export default function EmployeeDrawer({ employee, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex">
+    <div className="fixed inset-0 z-[100] flex justify-end">
       {/* Overlay */}
-      <div className="flex-1 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/20" onClick={onClose} />
 
       {/* Drawer */}
-      <div className="w-[450px] bg-white h-full shadow-2xl overflow-y-auto flex flex-col font-['Inter'] animate-in slide-in-from-right duration-300">
+      <div className="relative w-[450px] bg-white h-full shadow-2xl overflow-y-auto flex flex-col font-['Inter'] animate-in slide-in-from-right duration-500">
         {/* Header */}
         <div className="p-6 border-b bg-slate-50">
           <div className="flex items-center justify-between mb-6">
@@ -117,11 +117,11 @@ export default function EmployeeDrawer({ employee, onClose }) {
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-1">Fitment</p>
-              <p className="text-2xl font-black text-slate-900">{employee.scores.fitment}%</p>
+              <p className="text-2xl font-black text-slate-900">{employee.fitmentScore || employee.scores?.fitment || 0}%</p>
             </div>
             <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-1">Utilization</p>
-              <p className="text-2xl font-black text-slate-900">{employee.scores.utilization}%</p>
+              <p className="text-2xl font-black text-slate-900">{employee.utilization || employee.scores?.utilization || 0}%</p>
             </div>
             <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center border-blue-100 bg-blue-50/30">
               <p className="text-[10px] font-bold text-blue-400 uppercase tracking-tighter mb-1">Soft Skills Avg</p>

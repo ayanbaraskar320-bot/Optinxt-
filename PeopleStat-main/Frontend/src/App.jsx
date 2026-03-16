@@ -10,9 +10,8 @@ import { AppSidebar } from "./components/AppSidebar.jsx";
 
 import { NotificationPanel } from "./components/NotificationPanel.jsx";
 import { ProfileDropdown } from "./components/ProfileDropdown.jsx";
-import { ThemeToggle } from "./components/ThemeToggle.jsx";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip.jsx";
-import { HelpCircle, Lock, Bot } from "lucide-react";
+import { HelpCircle, Lock } from "lucide-react";
 import { Badge } from "./components/ui/badge.jsx";
 import { Button } from "./components/ui/button.jsx";
 import { cn } from "@/lib/utils";
@@ -210,7 +209,6 @@ function AppContent() {
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               <div className="h-6 w-px bg-slate-200" />
-              <div className="flex items-center gap-2" />
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
@@ -250,8 +248,8 @@ function AppContent() {
         </div>
       </div>
 
-      {/* Floating AI Chat */}
-      {!isAuthPage && <AIChat isFloating={true} isOpen={isChatOpen} onToggle={() => setIsChatOpen(!isChatOpen)} />}
+      {/* Floating AI Chat (Only for Managers) */}
+      {!isAuthPage && user?.role === "manager" && <AIChat isFloating={true} isOpen={isChatOpen} onToggle={() => setIsChatOpen(!isChatOpen)} />}
     </SidebarProvider>
   );
 }

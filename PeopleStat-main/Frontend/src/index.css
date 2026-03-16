@@ -511,3 +511,35 @@
 
 /* link transitions */
 a { transition: color 0.15s ease; }
+
+@media print {
+  .sidebar-provider, 
+  header, 
+  .no-print,
+  button:not(.print-visible) {
+    display: none !important;
+  }
+  
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .print-container {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+  }
+  
+  body {
+    background: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  .card {
+    border: 1px solid #eee !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+}

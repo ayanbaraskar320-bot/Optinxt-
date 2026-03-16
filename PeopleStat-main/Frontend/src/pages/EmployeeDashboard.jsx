@@ -29,15 +29,10 @@ export default function EmployeeDashboard() {
     useEffect(() => {
         const loadData = async () => {
             try {
-                // Find the employee record matching the logged-in user
-                const empResponse = await api.get("/employees");
+                // Get the employee's own record from the dedicated endpoint
+                const empResponse = await api.get("/employee/me");
                 if (empResponse.data.success) {
-                    const allEmployees = empResponse.data.data;
-                    // Match by email or userid
-                    const myRecord = allEmployees.find(
-                        e => e.email === user?.email || e.userid === user?.id
-                    ) || allEmployees[0];
-                    
+                    const myRecord = empResponse.data.data;
                     setEmployeeData(myRecord);
 
                     // Try to get analysis data for this employee
@@ -81,10 +76,10 @@ export default function EmployeeDashboard() {
         );
     }
 
-    const fitment = analysis?.analysis?.fitment_score ?? employeeData.fitmentScore ?? 0;
-    const productivity = analysis?.analysis?.productivity_score ?? employeeData.productivity ?? 0;
-    const utilization = analysis?.analysis?.utilization_score ?? employeeData.utilization ?? 0;
-    const fatigue = analysis?.analysis?.fatigue_score ?? employeeData.fatigueScore ?? 0;
+    const fitment = analysis?.analysis?.fitment_score ?? employeeData.scores?.fitment ?? employeeData.fitmentScore ?? 0;
+    const productivity = analysis?.analysis?.productivity_score ?? employeeData.scores?.productivity ?? employeeData.productivity ?? 0;
+    const utilization = analysis?.analysis?.utilization_score ?? employeeData.scores?.utilization ?? employeeData.utilization ?? 0;
+    const fatigue = analysis?.analysis?.fatigue_score ?? employeeData.scores?.fatigue ?? employeeData.fatigueScore ?? 0;
     const recommendation = analysis?.analysis?.recommendation || 'Run workforce analysis to generate personalized insights.';
     const recommendationType = analysis?.analysis?.recommendation_type || 'stable';
     const talentCategory = analysis?.talentCategory?.category || 'Core Contributors';

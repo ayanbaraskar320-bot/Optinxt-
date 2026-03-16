@@ -19,7 +19,7 @@ import {
 import { useAI } from "@/contexts/AIContext";
 
 const AIChat = ({ isFloating = false, isOpen = true, onToggle, suggestionTrigger, mode = 'workforce' }) => {
-  const { messages, sendMessage, isLoading, clearChat } = useAI();
+  const { messages, setMessages, sendMessage, isLoading, clearChat } = useAI();
   const [inputMessage, setInputMessage] = useState("");
   const [isMinimized, setIsMinimized] = useState(false);
   const messagesEndRef = useRef(null);
@@ -59,19 +59,21 @@ const AIChat = ({ isFloating = false, isOpen = true, onToggle, suggestionTrigger
       }
 
       return (
-        <div className="text-sm whitespace-pre-wrap">{textContent}</div>
+        <div className="text-sm whitespace-pre-wrap break-words overflow-hidden">{textContent}</div>
       );
     } else {
       // Rich UI mode for full page
       return (
-        <div className="w-full max-w-full overflow-y-auto space-y-4">
-          <div className="whitespace-pre-wrap">{message.content}</div>
+        <div className="w-full max-w-full space-y-4">
+          <div className="whitespace-pre-wrap break-words overflow-hidden">{message.content}</div>
 
           {/* Employee Profile Cards */}
           {message.type === "ai" && message.detectedEmployees && message.detectedEmployees.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {message.detectedEmployees.map((employee, index) => (
-                <EmployeeProfileCard key={index} employee={employee} />
+                <div key={index} className="max-w-full overflow-hidden">
+                  <EmployeeProfileCard employee={employee} />
+                </div>
               ))}
             </div>
           )}
@@ -91,7 +93,7 @@ const AIChat = ({ isFloating = false, isOpen = true, onToggle, suggestionTrigger
     };
 
     // Add user message immediately
-    messages.push(userMessage);
+    setMessages(prev => [...prev, userMessage]);
     setInputMessage("");
 
     // Send to AI
@@ -281,7 +283,7 @@ const AIChat = ({ isFloating = false, isOpen = true, onToggle, suggestionTrigger
       </div>
 
       {/* Scrollable Chat Messages */}
-      <ScrollArea className="flex-1 p-6" style={{ maxHeight: 'calc(100vh - 240px)', overflowY: 'auto' }}>
+      <ScrollArea className="flex-1 p-6 overflow-y-auto">
                 {messages.length === 0 && (
                   <div className="text-center text-gray-500 py-12">
                     <Brain className="h-12 w-12 mx-auto mb-4 text-blue-600" />
@@ -304,14 +306,14 @@ const AIChat = ({ isFloating = false, isOpen = true, onToggle, suggestionTrigger
                         </div>
                       )}
                       <div
-                        className={`max-w-[70%] p-4 rounded-lg ${
+                        className={`max-w-[85%] p-4 rounded-lg shadow-sm ${
                           message.type === "user"
                             ? "bg-blue-600 text-white"
-                            : "bg-slate-100 text-slate-900"
-                        }`}
+                            : "bg-slate-100 text-slate-900 border border-slate-200"
+                        } break-words overflow-hidden`}
                       >
                         {renderMessageContent(message)}
-                        <div className={`text-xs mt-2 ${message.type === "user" ? "text-blue-100" : "text-slate-500"}`}>
+                        <div className={`text-[10px] mt-2 font-medium opacity-60 ${message.type === "user" ? "text-blue-100" : "text-slate-500"}`}>
                           {message.timestamp.toLocaleString()}
                         </div>
                       </div>
