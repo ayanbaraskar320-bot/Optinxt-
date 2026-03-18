@@ -206,20 +206,6 @@ export default function LandingPage() {
     { value: "171+", label: "Workforce Profiles Analyzed" },
   ];
 
-  const pricingPlans = [
-    {
-      name: "Starter", price: "$49", period: "/mo", desc: "Perfect for small teams getting started.", color: "#3b82f6",
-      features: ["Up to 25 employees", "Fitment Analysis", "Basic Dashboards", "Email Support"],
-    },
-    {
-      name: "Pro", price: "$149", period: "/mo", desc: "Full AI suite for growing organizations.", color: "#f97316", popular: true,
-      features: ["Up to 200 employees", "All AI Features", "Fatigue & Gap Analysis", "Workforce Intelligence", "Priority Support"],
-    },
-    {
-      name: "Enterprise", price: "Custom", period: "", desc: "Tailored solutions at scale.", color: "#8b5cf6",
-      features: ["Unlimited employees", "Custom Integrations", "Dedicated CSM", "SLA Guarantees", "On-prem option"],
-    },
-  ];
 
   const s = {
     page: { fontFamily: "'Inter', 'Segoe UI', sans-serif", color: "#0f172a", overflowX: "hidden", background: "#fff" },
@@ -297,7 +283,6 @@ export default function LandingPage() {
     },
     statsGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 32, maxWidth: 900, margin: "0 auto" },
     // PRICING
-    pricingGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 24, maxWidth: 1000, margin: "0 auto" },
     // FOOTER / CTA
     cta: {
       background: "linear-gradient(135deg,#f97316,#dc2626,#9333ea)", padding: "80px 5%", textAlign: "center", color: "#fff"
@@ -315,7 +300,7 @@ export default function LandingPage() {
 
         {/* Desktop links */}
         <div style={{ ...s.navLinks, display: window.innerWidth < 768 ? "none" : "flex" }}>
-          {["Home", "Features", "Solutions", "Pricing", "About"].map(l => (
+          {["Home", "Features", "Solutions", "About"].map(l => (
             <a key={l} style={s.navLink} href={`#${l.toLowerCase()}`}>{l}</a>
           ))}
         </div>
@@ -455,61 +440,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── PRICING ── */}
-      <section id="pricing" style={{ ...s.section, background: "#f8fafc" }}>
-        <div style={s.sectionCenter}>
-          <span style={{ ...s.chip, background: "linear-gradient(135deg,#f0fdf4,#dcfce7)", color: "#16a34a" }}>PRICING</span>
-          <h2 style={s.h2}>Simple, transparent pricing</h2>
-          <p style={s.subtext}>Start free. Scale as you grow. No hidden fees.</p>
-        </div>
-        <div style={s.pricingGrid}>
-          {pricingPlans.map((p, i) => (
-            <div key={i} style={{
-              background: p.popular ? "linear-gradient(135deg,#0f172a,#1e3a5f)" : "#fff",
-              borderRadius: 20, padding: "32px 28px",
-              border: p.popular ? `2px solid ${p.color}` : "1.5px solid #e2e8f0",
-              boxShadow: p.popular ? `0 20px 60px ${p.color}30` : "0 4px 16px rgba(0,0,0,0.06)",
-              position: "relative", transition: "all 0.3s"
-            }}>
-              {p.popular && (
-                <div style={{
-                  position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)",
-                  background: `linear-gradient(135deg,${p.color},#dc2626)`,
-                  color: "#fff", fontSize: 11, fontWeight: 800, padding: "4px 16px",
-                  borderRadius: 20, letterSpacing: "0.08em"
-                }}>MOST POPULAR</div>
-              )}
-              <div style={{ fontSize: 14, fontWeight: 700, color: p.popular ? "#94a3b8" : "#64748b", marginBottom: 8 }}>{p.name.toUpperCase()}</div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 8 }}>
-                <span style={{ fontSize: 42, fontWeight: 900, color: p.popular ? "#fff" : "#0f172a" }}>{p.price}</span>
-                <span style={{ fontSize: 16, color: p.popular ? "#94a3b8" : "#64748b" }}>{p.period}</span>
-              </div>
-              <p style={{ fontSize: 14, color: p.popular ? "#94a3b8" : "#64748b", marginBottom: 24 }}>{p.desc}</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
-                {p.features.map((f, j) => (
-                  <div key={j} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: p.popular ? "#e2e8f0" : "#0f172a" }}>
-                    <div style={{ color: p.color, flexShrink: 0 }}><IconCheck /></div>
-                    {f}
-                  </div>
-                ))}
-              </div>
-              <button
-                onClick={() => navigate("/register")}
-                style={{
-                  width: "100%", padding: "13px", borderRadius: 10, fontSize: 15, fontWeight: 700,
-                  background: p.popular ? `linear-gradient(135deg,${p.color},#dc2626)` : "transparent",
-                  color: p.popular ? "#fff" : p.color,
-                  border: p.popular ? "none" : `2px solid ${p.color}`,
-                  cursor: "pointer", transition: "all 0.25s",
-                  boxShadow: p.popular ? `0 8px 24px ${p.color}45` : "none"
-                }}
-              >
-                {p.price === "Custom" ? "Contact Sales" : "Start Free Trial"}
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* ── CTA BANNER ── */}
       <section style={s.cta}>
