@@ -205,14 +205,14 @@ function AppContent() {
 
         <div className="flex flex-col flex-1 overflow-hidden">
           {/* Header */}
-          <header className="flex items-center justify-between px-6 py-3 border-b bg-background sticky top-0 z-40">
+          <header className="flex items-center justify-between px-6 py-2.5 border-b border-sidebar-border bg-sidebar text-sidebar-foreground sticky top-0 z-40 shadow-sm">
             <div className="flex items-center gap-4">
-              <SidebarTrigger />
-              <div className="h-6 w-px bg-slate-200" />
+              <SidebarTrigger className="hover:bg-sidebar-accent hover:text-white transition-colors" />
+              <div className="h-6 w-px bg-sidebar-border" />
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
-              <div className="flex items-center gap-1 border-r pr-4 border-slate-200">
+              <div className="flex items-center gap-1 border-r pr-4 border-sidebar-border">
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <NotificationPanel onNavigate={navigate} />
@@ -227,7 +227,7 @@ function AppContent() {
                             variant="ghost"
                             size="icon"
                             onClick={() => navigate("/documentation")}
-                            className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                            className="text-sidebar-foreground/80 hover:text-white hover:bg-sidebar-accent transition-colors"
                         >
                             <HelpCircle className="h-5 w-5" />
                         </Button>

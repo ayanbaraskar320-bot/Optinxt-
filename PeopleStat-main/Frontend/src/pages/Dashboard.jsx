@@ -85,7 +85,7 @@ export default function Dashboard() {
         action: "Schedule wellness interventions"
       },
       automation: {
-        value: "$" + kpis.automationSavings,
+        value: kpis.automationSavings,
         topImpacted: [...employees].sort((a, b) => (b.scores?.automationPotential || 0) - (a.scores?.automationPotential || 0)).slice(0, 3).map(emp => emp.name),
         action: "Prioritize RPA implementation"
       }
@@ -150,7 +150,7 @@ export default function Dashboard() {
               <p style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.08em", color: "#053259", fontWeight: 700, marginBottom: "10px", opacity: 0.7 }}>
                 Potential Savings
               </p>
-              <p className="automation-savings-value">{"$" + kpis.automationSavings}</p>
+              <p className="automation-savings-value">{kpis.automationSavings}</p>
               <p className="automation-savings-subtitle">Annualized Opportunity</p>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginTop: "16px", color: "#6A89A7" }}>
                 <TrendingUp size={14} />

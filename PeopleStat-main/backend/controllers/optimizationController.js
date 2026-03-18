@@ -55,7 +55,7 @@ export const getRecommendations = async (req, res) => {
         description: `Critical burnout risk detected for ${fatigueRiskEmps.length} employee(s) based on overtime patterns and workload intensity analysis.`,
         impact: {
           employees: fatigueRiskEmps.length,
-          savings: `₹${(fatigueRiskEmps.length * 95000 / 100000).toFixed(1)}L`,
+          savings: `$${(fatigueRiskEmps.length * 95000 / 100000).toFixed(1)}L`,
           riskReduction: '45%',
         },
         basis: 'Fatigue & Stress Exposure Analysis',
@@ -80,7 +80,7 @@ export const getRecommendations = async (req, res) => {
         description: `${overfitEmps.length} employee(s) show high fitment but underutilization, indicating potential for higher-responsibility roles.`,
         impact: {
           employees: overfitEmps.length,
-          savings: `₹${(overfitEmps.length * 45000 / 100000).toFixed(1)}L`,
+          savings: `$${(overfitEmps.length * 45000 / 100000).toFixed(1)}L`,
           riskReduction: '15%',
         },
         basis: 'Fitment vs Utilization Matrix',
@@ -105,7 +105,7 @@ export const getRecommendations = async (req, res) => {
         description: `Skill gaps detected for ${skillGapEmps.length} employee(s) based on fitment analysis against role requirements.`,
         impact: {
           employees: skillGapEmps.length,
-          savings: `₹${(skillGapEmps.length * 80000 / 100000).toFixed(1)}L`,
+          savings: `$${(skillGapEmps.length * 80000 / 100000).toFixed(1)}L`,
           riskReduction: '32%',
         },
         basis: 'Gap Analysis Intelligence',
@@ -129,7 +129,7 @@ export const getRecommendations = async (req, res) => {
         description: `${overloadedEmps.length} employee(s) have utilization over 95%, creating quality and retention risk.`,
         impact: {
           employees: overloadedEmps.length,
-          savings: `₹${(overloadedEmps.length * 60000 / 100000).toFixed(1)}L`,
+          savings: `$${(overloadedEmps.length * 60000 / 100000).toFixed(1)}L`,
           riskReduction: '25%',
         },
         basis: 'Utilization Threshold Analysis',
@@ -145,10 +145,10 @@ export const getRecommendations = async (req, res) => {
     if (automationOpportunities.length > 0) {
       recommendations.push({
         title: 'Process Automation Opportunities',
-        description: `${automationOpportunities.length} process area(s) identified with automation potential. Total estimated savings: ₹${(totalAutomationSavings / 100000).toFixed(1)}L annually.`,
+        description: `${automationOpportunities.length} process area(s) identified with automation potential. Total estimated savings: $${(totalAutomationSavings / 100000).toFixed(1)}L annually.`,
         impact: {
           processes: automationOpportunities.length,
-          savings: `₹${(totalAutomationSavings / 100000).toFixed(1)}L`,
+          savings: `$${(totalAutomationSavings / 100000).toFixed(1)}L`,
           riskReduction: '20%',
         },
         basis: 'FTE Workload & Automation Analysis',

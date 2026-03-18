@@ -541,7 +541,7 @@ export default function Employees() {
                     <p key={emp.employeeId} className="text-sm text-[#0F172A]">{emp.name} → {emp.recommendedRole || 'Next Level'}</p>
                   ))}
               </div>
-              <Button variant="outline" className="w-full border-green-300 text-green-700 hover:bg-green-100" onClick={() => navigate("/fitment-analysis")}>
+              <Button variant="outline" className="w-full border-green-300 text-green-700 hover:bg-green-100" onClick={() => navigate("/fitment?filter=promotion-ready")}>
                 View All Candidates
               </Button>
             </Card>

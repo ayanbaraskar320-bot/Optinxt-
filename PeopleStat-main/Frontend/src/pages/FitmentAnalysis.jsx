@@ -58,6 +58,7 @@ export default function FitmentAnalysis() {
     const params = new URLSearchParams(window.location.search);
     const filter = params.get("filter");
     if (filter === "low-fitment") return "Unfit";
+    if (filter === "promotion-ready") return "Overfit";
     return "All Fitment Status";
   });
 

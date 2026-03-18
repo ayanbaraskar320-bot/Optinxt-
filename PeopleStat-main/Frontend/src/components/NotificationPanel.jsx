@@ -98,39 +98,46 @@ export function NotificationPanel({ onNavigate }) {
         aria-label="Notifications"
         onClick={() => setIsOpen(o => !o)}
         style={{
-          background: isOpen ? "rgba(106,137,167,0.1)" : "none",
+          background: isOpen ? "var(--sidebar-accent)" : "none",
           border: "none",
           cursor: "pointer",
           padding: "8px",
           borderRadius: "8px",
           position: "relative",
-          color: isOpen ? "#6A89A7" : "#7A7A7A",
-          transition: "background 0.15s, color 0.15s",
+          color: isOpen ? "#FFFFFF" : "var(--sidebar-foreground)",
+          transition: "all 0.15s",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
-        onMouseEnter={e => e.currentTarget.style.background = "#F0F7FF"}
-        onMouseLeave={e => e.currentTarget.style.background = isOpen ? "rgba(106,137,167,0.1)" : "none"}
+        onMouseEnter={e => {
+          e.currentTarget.style.background = "var(--sidebar-accent)";
+          e.currentTarget.style.color = "#FFFFFF";
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = isOpen ? "var(--sidebar-accent)" : "none";
+          e.currentTarget.style.color = isOpen ? "#FFFFFF" : "var(--sidebar-foreground)";
+        }}
       >
         <Bell size={18} />
         {unreadCount > 0 && (
           <span style={{
             position: "absolute",
-            top: "5px",
-            right: "5px",
-            minWidth: "16px",
-            height: "16px",
-            background: "#DC2626",
-            borderRadius: "8px",
-            border: "2px solid #FFF",
+            top: "4px",
+            right: "4px",
+            minWidth: "14px",
+            height: "14px",
+            background: "#EF4444",
+            borderRadius: "50%",
+            border: "2px solid var(--sidebar)",
             color: "#FFF",
-            fontSize: "9px",
-            fontWeight: 700,
+            fontSize: "8px",
+            fontWeight: 800,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "0 3px",
+            padding: "0 2px",
+            boxShadow: "0 0 10px rgba(239, 68, 68, 0.4)",
           }}>
             {unreadCount}
           </span>

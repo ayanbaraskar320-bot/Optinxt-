@@ -14,7 +14,7 @@ export function getWorkforceKPIs(liveEmployees) {
         avgProductivity: 0,
         avgUtilization: 0,
         burnoutRisk: 0,
-        automationSavings: "₹0L",
+        automationSavings: "$0L",
         rawAutomationSavings: 0
     };
 
@@ -43,8 +43,8 @@ export function getWorkforceKPIs(liveEmployees) {
         avgUtilization,
         burnoutRisk: highFatiguePct,
         automationSavings: totalAutomationSavings >= 100000
-            ? `₹${(totalAutomationSavings / 100000).toFixed(1)}L`
-            : `₹${Math.round(totalAutomationSavings).toLocaleString()}`,
+            ? `$${(totalAutomationSavings / 100000).toFixed(1)}L`
+            : `$${Math.round(totalAutomationSavings).toLocaleString()}`,
         rawAutomationSavings: totalAutomationSavings
     };
 }
