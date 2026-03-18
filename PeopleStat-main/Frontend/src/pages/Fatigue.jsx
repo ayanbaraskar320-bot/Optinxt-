@@ -311,7 +311,7 @@ export default function Fatigue() {
       </div>
 
       <Dialog open={activeModal === 'metric'} onOpenChange={() => setActiveModal(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{modalData?.title} Details</DialogTitle>
           </DialogHeader>

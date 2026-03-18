@@ -138,85 +138,24 @@ export default function UploadData() {
               <Layout className="h-5 w-5 text-blue-600" />
               Dataset Upload
             </CardTitle>
-            <CardDescription>Drag and drop your organizational files below</CardDescription>
+            <CardDescription>Automated workforce data ingestion</CardDescription>
           </CardHeader>
-          <CardContent className="p-8">
-            {!file ? (
-              <div 
-                onDragOver={onDragOver}
-                onDragLeave={onDragLeave}
-                onDrop={onDrop}
-                className={cn(
-                  "border-2 border-dashed rounded-2xl p-12 transition-all flex flex-col items-center justify-center gap-4 cursor-pointer group",
-                  isDragging ? "border-blue-500 bg-blue-50/50" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-                )}
-                onClick={() => document.getElementById('file-upload').click()}
-              >
-                <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <UploadCloud className="h-10 w-10 text-slate-400 group-hover:text-blue-500 transition-colors" />
+          <CardContent className="p-12">
+            <div className="flex flex-col items-center justify-center gap-6 py-10 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center">
+                    <Clock className="h-10 w-10 text-amber-500" />
                 </div>
                 <div className="text-center">
-                  <p className="text-lg font-bold text-slate-900">Click to upload or drag and drop</p>
-                  <p className="text-sm text-slate-500 mt-1">Supports XLSX, CSV, JSON, and structured PDF tables</p>
+                    <h3 className="text-2xl font-black text-slate-900 mb-2">Coming Soon</h3>
+                    <p className="text-slate-500 max-w-sm mx-auto">
+                        The automated data ingestion pipeline is currently being optimized. 
+                        Please contact your administrator for manual data synchronization.
+                    </p>
                 </div>
-                <input 
-                  id="file-upload" 
-                  type="file" 
-                  className="hidden" 
-                  accept=".csv,.xlsx,.xls,.json,.pdf"
-                  onChange={onFileSelect}
-                />
-              </div>
-            ) : (
-              <div className="p-6 border rounded-2xl bg-slate-50/50 border-slate-200 space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-white rounded-xl shadow-sm border border-slate-100">
-                      {getFileIcon()}
-                    </div>
-                    <div>
-                      <p className="font-bold text-slate-900 line-clamp-1">{file.name}</p>
-                      <p className="text-xs text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                    </div>
-                  </div>
-                  {!isUploading && (
-                    <Button variant="ghost" size="icon" onClick={removeFile} className="text-slate-400 hover:text-red-500">
-                      <X className="h-5 w-5" />
-                    </Button>
-                  )}
-                </div>
-
-                {isUploading && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-bold text-slate-600 uppercase tracking-widest">
-                      <span>{uploadStatus === 'uploading' ? 'Analyzing Dataset...' : 'Processing Complete'}</span>
-                      <span>{uploadProgress}%</span>
-                    </div>
-                    <Progress value={uploadProgress} className="h-2 bg-slate-200" indicatorClassName="bg-blue-600" />
-                  </div>
-                )}
-
-                {uploadStatus === 'success' && (
-                  <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-                    <CheckCircle2 className="h-4 w-4" />
-                    <span className="text-sm font-bold">Analysis pipeline completed successfully.</span>
-                  </div>
-                )}
-
-                {!isUploading && uploadStatus !== 'success' && (
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 py-6 text-base font-black uppercase tracking-widest" onClick={handleUpload}>
-                    Start AI Ingestion
-                  </Button>
-                )}
-
-                {uploadStatus === 'success' && (
-                  <div className="flex gap-3">
-                    <Button variant="outline" className="flex-1" onClick={removeFile}>Upload Another</Button>
-                    <Button className="flex-1 bg-slate-900" onClick={() => window.location.href = "/workforce-intelligence"}>View Insights</Button>
-                  </div>
-                )}
-              </div>
-            )}
+                <Badge variant="outline" className="px-4 py-1 text-xs font-bold uppercase tracking-widest text-amber-600 border-amber-200 bg-amber-50">
+                    Feature in Development
+                </Badge>
+            </div>
           </CardContent>
         </Card>
 

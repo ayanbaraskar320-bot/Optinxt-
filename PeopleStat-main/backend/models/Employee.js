@@ -24,6 +24,13 @@ const employeeSchema = new mongoose.Schema({
   fatigueScore: { type: Number, min: 0, max: 100, default: 0 },
   automationPotential: { type: Number, default: 0 },
   
+  // Soft skills scores
+  communication: { type: Number, min: 0, max: 100, default: 0 },
+  problemSolving: { type: Number, min: 0, max: 100, default: 0 },
+  teamwork: { type: Number, min: 0, max: 100, default: 0 },
+  adaptability: { type: Number, min: 0, max: 100, default: 0 },
+  creativity: { type: Number, min: 0, max: 100, default: 0 },
+  
   // Role info
   currentRole: String,
   recommendedRole: String,

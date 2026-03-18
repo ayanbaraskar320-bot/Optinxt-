@@ -46,7 +46,7 @@ export default function CareerCoach() {
         </div>
 
         {/* Two-Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 h-[calc(100vh-220px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8 h-[calc(100vh-220px)]">
 
           {/* Left Sidebar: Career Focus Areas */}
           <div className="lg:col-span-1">
@@ -63,11 +63,11 @@ export default function CareerCoach() {
                     <Button
                       key={i}
                       variant="outline"
-                      className="w-full text-left justify-start h-auto p-4 border-slate-100 hover:border-indigo-300 hover:bg-indigo-50 transition-all group rounded-xl"
+                      className="w-full text-left justify-start h-auto p-4 border-slate-100 hover:border-indigo-300 hover:bg-indigo-50 transition-all group rounded-xl whitespace-normal"
                       onClick={() => handleSuggest(prompt.text)}
                     >
-                      <div className="flex items-start gap-3">
-                        <Icon className={`h-4 w-4 mt-0.5 ${prompt.color} group-hover:scale-110 transition-transform`} />
+                      <div className="flex items-start gap-3 w-full">
+                        <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${prompt.color} group-hover:scale-110 transition-transform`} />
                         <span className="text-xs font-bold text-slate-600 group-hover:text-indigo-700 leading-tight">
                           {prompt.text}
                         </span>

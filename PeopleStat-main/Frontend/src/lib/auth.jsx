@@ -27,12 +27,15 @@ export function AuthProvider({ children }) {
     initAuth();
   }, []);
 
-  // REAL LOGIN — backend on port 5000 (matches .env PORT=5000)
-  const BACKEND_URL = "http://localhost:5000";
+  // REAL LOGIN — backend on port 5001 (matches .env PORT=5001)
+  // BACKEND URL — use VITE_API_URL from environment or fallback to localhost
+  const API_BASE_URL = import.meta.env.VITE_API_URL
+    ? import.meta.env.VITE_API_URL.replace('/api', '')
+    : "http://localhost:5001";
 
   const login = async (usernameOrEmail, password) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: usernameOrEmail, password }),

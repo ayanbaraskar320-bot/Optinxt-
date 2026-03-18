@@ -67,7 +67,7 @@ const adminOptimizationItems = [
 export function AppSidebar() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
-  const role = user?.role || "employee";
+  const role = (user?.role || "employee").toLowerCase();
 
   const handleLogout = () => {
     logout();
@@ -90,7 +90,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r-0 bg-sidebar">
-      <SidebarHeader className="px-6 py-6 pb-2">
+      <SidebarHeader className="px-6 py-4 pb-2">
         <div style={{ paddingBottom: 4 }}>
           <OptiNXtLogo variant="full" size="sm" />
         </div>

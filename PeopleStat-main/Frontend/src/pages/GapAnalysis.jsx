@@ -110,6 +110,22 @@ export default function GapAnalysis() {
     }
   };
 
+  const handleExport = () => {
+    if (!employeesWithGaps.length) return;
+    const headers = "Name,Position,Department,Gap Severity,Gap Count,Fitment Score\n";
+    const rows = employeesWithGaps.map(e => 
+      `${e.name},${e.position},${e.department},${e.severity},${e.gapCount},${e.scores?.fitment || e.fitmentScore || 0}%`
+    ).join("\n");
+    const blob = new Blob([headers + rows], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "gap-analysis-report.csv";
+    a.click();
+    window.URL.revokeObjectURL(url);
+    toast({ title: "Export Successful", description: "Report downloaded as CSV" });
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-6 font-['Inter'] space-y-8">
       {isLoading && (
@@ -127,7 +143,7 @@ export default function GapAnalysis() {
           </p>
         </div>
 
-        <Button variant="outline">
+        <Button variant="outline" onClick={handleExport}>
           <Download className="h-4 w-4 mr-2" />
           Export Report
         </Button>

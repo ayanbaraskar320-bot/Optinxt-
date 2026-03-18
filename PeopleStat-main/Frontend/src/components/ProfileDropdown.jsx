@@ -45,7 +45,6 @@ export function ProfileDropdown({ user }) {
     { label: "Change Password", icon: Lock, action: () => navigate("/settings"), id: "password" },
     null, // divider
     { label: "Help & Support", icon: HelpCircle, action: () => navigate("/documentation"), id: "help" },
-    { label: "Keyboard Shortcuts", icon: Keyboard, action: () => {}, id: "shortcuts" },
     null, // divider
     { label: "Logout", icon: LogOut, action: async () => { await logout(); navigate("/login"); }, id: "logout", danger: true },
   ];

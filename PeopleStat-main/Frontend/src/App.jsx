@@ -10,9 +10,8 @@ import { AppSidebar } from "./components/AppSidebar.jsx";
 
 import { NotificationPanel } from "./components/NotificationPanel.jsx";
 import { ProfileDropdown } from "./components/ProfileDropdown.jsx";
-import { ThemeToggle } from "./components/ThemeToggle.jsx";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip.jsx";
-import { HelpCircle, Lock, Bot } from "lucide-react";
+import { HelpCircle, Lock } from "lucide-react";
 import { Badge } from "./components/ui/badge.jsx";
 import { Button } from "./components/ui/button.jsx";
 import { cn } from "@/lib/utils";
@@ -99,7 +98,7 @@ function ManagerRoute({ component: Component }) {
 
   if (!user) return null;
 
-  if (user.role !== "manager") {
+  if ((user.role || "").toLowerCase() !== "manager") {
     return (
       <div className="flex items-center justify-center h-screen text-center">
         <div className="max-w-md p-8 bg-white rounded-2xl shadow-xl border border-slate-100">
@@ -131,7 +130,7 @@ function AppRouter() {
       <Route path="/dashboard" component={() => (
         <ProtectedRoute component={() => {
           const { user } = useAuth();
-          return user.role === "manager" ? <Dashboard /> : <EmployeeDashboard />;
+          return (user.role || "").toLowerCase() === "manager" ? <Dashboard /> : <EmployeeDashboard />;
         }} />
       )} />
       <Route path="/employees" component={() => <ManagerRoute component={Employees} />} />
@@ -210,7 +209,6 @@ function AppContent() {
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               <div className="h-6 w-px bg-slate-200" />
-              <div className="flex items-center gap-2" />
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
@@ -250,8 +248,8 @@ function AppContent() {
         </div>
       </div>
 
-      {/* Floating AI Chat */}
-      {!isAuthPage && <AIChat isFloating={true} isOpen={isChatOpen} onToggle={() => setIsChatOpen(!isChatOpen)} />}
+      {/* Floating AI Chat (Only for Managers) */}
+      {!isAuthPage && user?.role === "manager" && <AIChat isFloating={true} isOpen={isChatOpen} onToggle={() => setIsChatOpen(!isChatOpen)} />}
     </SidebarProvider>
   );
 }

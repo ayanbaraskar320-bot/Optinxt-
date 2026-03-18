@@ -556,7 +556,7 @@ export default function Employees() {
 
         {/* ALERT DETAIL DIALOG */}
         <Dialog open={!!selectedAlert} onOpenChange={() => setSelectedAlert(null)}>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {selectedAlert?.type === 'burnout' && 'High Burnout Risk Alert'}
@@ -615,7 +615,7 @@ export default function Employees() {
 
         {/* AT-RISK EMPLOYEE DETAIL DIALOG */}
         <Dialog open={!!selectedAtRiskEmployee} onOpenChange={() => setSelectedAtRiskEmployee(null)}>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Employee Risk Assessment</DialogTitle>
             </DialogHeader>

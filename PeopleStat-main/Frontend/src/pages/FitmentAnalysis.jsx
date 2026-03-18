@@ -14,6 +14,7 @@ import { useAuth } from "@/lib/auth";
 import { api } from "@/services/api";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 export default function FitmentAnalysis() {
   const { user } = useAuth();
@@ -227,43 +228,43 @@ export default function FitmentAnalysis() {
             </div>
 
             <div className="overflow-x-auto max-h-[500px]">
-              <table className="w-full text-sm">
+              <table className="w-full text-xs">
                 <thead className="bg-gray-50 sticky top-0">
                   <tr>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Fitment</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Productivity</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Salary</th>
+                    <th className="px-3 py-3 text-left font-bold text-gray-500 uppercase tracking-wider w-[200px]">Employee</th>
+                    <th className="px-3 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">Role</th>
+                    <th className="px-3 py-3 text-left font-bold text-gray-500 uppercase tracking-wider w-[100px]">Fitment</th>
+                    <th className="px-3 py-3 text-left font-bold text-gray-500 uppercase tracking-wider w-[120px]">Productivity</th>
+                    <th className="px-3 py-3 text-left font-bold text-gray-500 uppercase tracking-wider w-[100px]">Salary</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {filteredEmployees.map((emp) => (
-                    <tr key={emp.employeeId} className="hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedEmployee(emp)}>
-                      <td className="px-4 py-4 whitespace-nowrap">
+                    <tr key={emp.employeeId} className="hover:bg-slate-50 cursor-pointer transition-colors" onClick={() => setSelectedEmployee(emp)}>
+                      <td className="px-3 py-3 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">
+                          <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-[10px]">
                             {(emp.name || "UN").split(' ').map(n => n[0]).join('')}
                           </div>
-                          <div className="ml-3">
-                            <div className="font-medium text-gray-900">{emp.name}</div>
-                            <div className="text-xs text-gray-500">{emp.employeeId}</div>
+                          <div className="ml-2">
+                            <div className="font-semibold text-gray-900 text-sm">{emp.name}</div>
+                            <div className="text-[10px] text-gray-400">{emp.employeeId}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-gray-600">{emp.position}</td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <Badge className={getFitmentColor(getFitmentBand(emp.scores?.fitment || emp.fitmentScore || 0))}>
+                      <td className="px-3 py-3 whitespace-nowrap text-gray-600 truncate max-w-[150px]">{emp.position}</td>
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        <Badge className={cn("px-2 py-0.5 text-[10px]", getFitmentColor(getFitmentBand(emp.scores?.fitment || emp.fitmentScore || 0)))}>
                           {getFitmentBand(emp.scores?.fitment || emp.fitmentScore || 0)}
                         </Badge>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <Progress value={emp.scores?.productivity || emp.productivity || 0} className="w-16" />
-                          <span>{emp.scores?.productivity || emp.productivity || 0}%</span>
+                          <Progress value={emp.scores?.productivity || emp.productivity || 0} className="w-12 h-1.5" />
+                          <span className="text-[10px] font-medium">{emp.scores?.productivity || emp.productivity || 0}%</span>
                         </div>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-gray-700 font-medium">${(emp.salary || 0).toLocaleString()}</td>
+                      <td className="px-3 py-3 whitespace-nowrap text-gray-700 font-bold text-[11px] font-mono">${(emp.salary || 0).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -370,7 +371,16 @@ export default function FitmentAnalysis() {
                   <XAxis type="number" dataKey="fitment" name="Fitment %" unit="%" domain={[0, 100]} />
                   <YAxis type="number" dataKey="productivity" name="Productivity %" unit="%" domain={[0, 100]} />
                   <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                  <Scatter name="Employees" data={scatterData} fill="#8884d8" />
+                  <Scatter name="Employees" data={scatterData}>
+                    {scatterData.map((entry, index) => {
+                      let color = "#8884d8"; // Default
+                      if (entry.fitment >= 50 && entry.productivity >= 50) color = "#10b981"; // Stars
+                      else if (entry.fitment < 50 && entry.productivity >= 50) color = "#3b82f6"; // Hidden Gems
+                      else if (entry.fitment >= 50 && entry.productivity < 50) color = "#f59e0b"; // Misallocated
+                      else if (entry.fitment < 50 && entry.productivity < 50) color = "#ef4444"; // Exit/Reskill
+                      return <Cell key={`cell-${index}`} fill={color} />;
+                    })}
+                  </Scatter>
                 </ScatterChart>
               </ResponsiveContainer>
             </div>
