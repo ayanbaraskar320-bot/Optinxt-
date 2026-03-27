@@ -17,7 +17,15 @@ import Employee from './models/Employee.js';
 import PerformanceRecord from './models/PerformanceRecord.js';
 import FTEWorkload from './models/FTEWorkload.js';
 import AnalysisResult from './models/AnalysisResult.js';
-// Removed runAnalysis import to avoid potential circular/import issues during seed
+
+import FitmentResponse from './models/FitmentResponse.js';
+import WorkingHours from './models/WorkingHours.js';
+import AssessmentResult from './models/AssessmentResult.js';
+import SprintHistory from './models/SprintHistory.js';
+import CareerProfile from './models/CareerProfile.js';
+import GapAnalysisSnapshot from './models/GapAnalysisSnapshot.js';
+
+import { runAnalysisPipeline } from './services/analysisPipeline.js';
 import { ROLE_SKILL_MAP, BAND_EXPERIENCE } from './services/fitmentEngine.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -133,6 +141,12 @@ const seedDatabase = async () => {
       PerformanceRecord.deleteMany({}),
       FTEWorkload.deleteMany({}),
       AnalysisResult.deleteMany({}),
+      FitmentResponse.deleteMany({}),
+      WorkingHours.deleteMany({}),
+      AssessmentResult.deleteMany({}),
+      SprintHistory.deleteMany({}),
+      CareerProfile.deleteMany({}),
+      GapAnalysisSnapshot.deleteMany({}),
     ]);
     console.log('✓ Cleared existing data.');
 
@@ -270,32 +284,83 @@ const seedDatabase = async () => {
         joiningDate: new Date(2020 + Math.floor(Math.random() * 4), Math.floor(Math.random() * 12), 1),
       });
 
-      // Generate Performance Records
-      const recordsToGen = faker.number.int({ min: 15, max: 25 });
-      const perfRecords = [];
-      for (let i = 0; i < recordsToGen; i++) {
-        perfRecords.push(generatePerformanceRecord(employee._id, subProcess, record.aptitudeScores));
-      }
       await PerformanceRecord.insertMany(perfRecords);
 
-      // Create Initial Analysis Result for 6x6
-      const prod = employee.productivity;
-      const fit = employee.fitmentScore;
-      const x = Math.min(6, Math.max(1, Math.ceil(fit / 16.6)));
-      const y = Math.min(6, Math.max(1, Math.ceil(prod / 16.6)));
-      
-      await AnalysisResult.create({
-        employee_id: employee._id,
-        productivity_score: prod,
-        utilization_score: employee.utilization,
-        fitment_score: fit,
-        fatigue_score: employee.fatigueScore,
-        matrix_x: x,
-        matrix_y: y,
-        talent_category: (y >= 5 && x >= 5) ? 'Elite Asset' : (y <= 2 && x <= 2) ? 'Performance Risk' : 'Core Contributor',
-        recommendation_type: (y >= 5 && x >= 5) ? 'high_performer' : (employee.fatigueScore > 75) ? 'burnout_risk' : 'stable',
-        analysis_date: new Date()
+      const cycle = '2024-Q1';
+
+      // Seed New Models
+      await AssessmentResult.create({
+        employeeId: employee._id,
+        aptitudeScores: {
+          spiritScore: record.aptitudeScores?.spiritScore * 10 || Math.round(50 + Math.random() * 40),
+          purposeScore: record.aptitudeScores?.purposeScore * 10 || Math.round(50 + Math.random() * 40),
+          rewardsScore: record.aptitudeScores?.rewardsScore * 10 || Math.round(50 + Math.random() * 40),
+          professionScore: record.aptitudeScores?.professionScore * 10 || Math.round(50 + Math.random() * 40)
+        },
+        softskillScoresFull: (record.softskillScoresFull || []).flatMap(cat => 
+          (cat.subcategories || []).map(sub => ({
+            category: cat.categoryName,
+            subCategory: sub.subCategoryName,
+            score: sub.score * 10 || Math.round(40 + Math.random() * 50),
+            median: sub.median * 10 || 50
+          }))
+        )
       });
+
+      await SprintHistory.create({
+        employeeId: employee._id,
+        cycle: cycle,
+        completedSprintCount: Math.floor(Math.random() * 12),
+        maxExpectedSprints: 12
+      });
+
+      await WorkingHours.create({
+        employeeId: employee._id,
+        reportingPeriod: cycle,
+        generalHours: {
+          standardHours: 160,
+          overtimeHours: Math.floor(Math.random() * 40),
+          weekendWork: Math.random() > 0.8 ? 'Yes' : 'No',
+          multipleRoles: Math.random() > 0.9 ? 'Yes' : 'No',
+          deadlinePressure: faker.helpers.arrayElement(['Low', 'Medium', 'High', 'Critical'])
+        },
+        processHours: {
+          invoicing: Math.random() * 20,
+          collections: Math.random() * 20,
+          meetings: 10
+        }
+      });
+
+      await CareerProfile.create({
+        employeeId: employee._id,
+        verifiedSkills: allSkills.slice(0, 4),
+        targetRole: {
+          title: 'Senior ' + employee.position,
+          requiredSkills: allSkills.slice(0, 8)
+        }
+      });
+
+      await FitmentResponse.create({
+        employeeId: employee._id,
+        evaluationCycle: cycle,
+        responses: {
+          pmsRating: 15,
+          innovation: 15,
+          customerOrientation: 15,
+          collaboration: 15,
+          communication: 15,
+          leadership: 15,
+          locationPreference: 20,
+          changeReadiness: 20
+        }
+      });
+
+      // Run Pipeline to compute scores and snapshots
+      try {
+        await runAnalysisPipeline(employee._id, cycle);
+      } catch (pipelineErr) {
+        console.warn(`Pipeline failed for ${employee.name}:`, pipelineErr.message);
+      }
     }
 
     // 5. Finalize

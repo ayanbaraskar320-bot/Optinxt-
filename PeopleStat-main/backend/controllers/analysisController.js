@@ -8,12 +8,9 @@ import AnalysisResult from '../models/AnalysisResult.js';
 import { calculateProductivity, calculateUtilization } from '../services/metricsEngine.js';
 import { calculateFitmentScore } from '../services/fitmentEngine.js';
 import { calculateFatigueScore } from '../services/fatigueEngine.js';
-import { 
-  generateRecommendation, 
-  generateAutomationRecommendation, 
-  categorizeTalent,
-  calculateMatrixCoordinates 
-} from '../services/recommendationEngine.js';
+import { generateAutomationRecommendation } from '../services/recommendationEngine.js';
+import { runAnalysisPipeline } from '../services/analysisPipeline.js';
+import GapAnalysisSnapshot from '../models/GapAnalysisSnapshot.js';
 
 /**
  * POST /api/analysis/run
@@ -21,9 +18,8 @@ import {
  */
 export const runAnalysis = async (req, res) => {
   try {
-    const { employeeId } = req.query;
+    const { employeeId, cycle = '2024-Q1' } = req.query;
     
-    // Get employees to analyze
     const query = employeeId ? { _id: employeeId } : {};
     const employees = await Employee.find(query);
 
@@ -36,81 +32,8 @@ export const runAnalysis = async (req, res) => {
 
     for (const employee of employees) {
       try {
-        // Get performance records for this employee
-        const perfRecords = await PerformanceRecord.find({ employee_id: employee._id })
-          .sort({ record_date: -1 })
-          .limit(30); // Last 30 records
-
-        // Calculate scores
-        const productivity = calculateProductivity(perfRecords);
-        const utilization = calculateUtilization(perfRecords);
-        const fitmentResult = calculateFitmentScore(employee, perfRecords);
-        const fatigueResult = calculateFatigueScore(perfRecords);
-
-        // Generate recommendation
-        const recommendation = generateRecommendation({
-          productivity,
-          utilization,
-          fitmentScore: fitmentResult.fitmentScore,
-          fatigueScore: fatigueResult.fatigueScore,
-        });
-
-        // Categorize in 6x6 talent matrix
-        const matrixResult = calculateMatrixCoordinates({
-          productivity,
-          quality_score: fitmentResult.qualityScore,
-          fitmentScore: fitmentResult.fitmentScore,
-          experience_score: fitmentResult.experienceScore,
-        });
-
-        // Save analysis result  
-        const analysisResult = await AnalysisResult.findOneAndUpdate(
-          { employee_id: employee._id },
-          {
-            employee_id: employee._id,
-            productivity_score: productivity,
-            utilization_score: utilization,
-            fitment_score: fitmentResult.fitmentScore,
-            fatigue_score: fatigueResult.fatigueScore,
-            recommendation: recommendation.recommendation,
-            recommendation_type: recommendation.type,
-            matrix_x: matrixResult.x,
-            matrix_y: matrixResult.y,
-            talent_category: matrixResult.category,
-            analysis_date: new Date(),
-            details: {
-              overtime_index: fatigueResult.overtimeIndex,
-              workload_intensity: fatigueResult.workloadIntensity,
-              performance_decline: fatigueResult.performanceDecline,
-              skill_match_score: fitmentResult.skillMatchScore,
-              experience_score: fitmentResult.experienceScore,
-              quality_score: fitmentResult.qualityScore,
-            },
-          },
-          { upsert: true, new: true }
-        );
-
-        // Update employee record with latest scores
-        await Employee.findByIdAndUpdate(employee._id, {
-          productivity,
-          utilization,
-          fitmentScore: fitmentResult.fitmentScore,
-          fatigueScore: fatigueResult.fatigueScore,
-          updatedAt: new Date(),
-        });
-
-        results.push({
-          employee: { id: employee._id, name: employee.name, band: employee.band, process_area: employee.process_area },
-          scores: {
-            productivity,
-            utilization,
-            fitment: fitmentResult.fitmentScore,
-            fatigue: fatigueResult.fatigueScore,
-          },
-          recommendation: recommendation.type,
-          talentCategory: matrixResult.category,
-          matrix: { x: matrixResult.x, y: matrixResult.y }
-        });
+        const analysisResult = await runAnalysisPipeline(employee._id, cycle);
+        results.push(analysisResult);
       } catch (empErr) {
         errors.push({ employeeId: employee._id, error: empErr.message });
       }
@@ -292,14 +215,26 @@ export const getAnalysisSummary = async (req, res) => {
       bandDistribution[band] = (bandDistribution[band] || 0) + 1;
     });
 
-    // Distribution for 6x6 Matrix
-    const matrixDistribution = [];
-    for (let x = 1; x <= 6; x++) {
-      for (let y = 1; y <= 6; y++) {
-        const count = analysisResults.filter(r => r.matrix_x === x && r.matrix_y === y).length;
-        if (count > 0) matrixDistribution.push({ x, y, count });
-      }
-    }
+    // Distribution for 6x6 Matrix using new collections
+    const matrixStats = await GapAnalysisSnapshot.aggregate([
+      { $group: {
+        _id: { perfLevel: '$talentMatrix.performanceLevel', riskLevel: '$talentMatrix.riskLevel' },
+        count: { $sum: 1 }
+      }},
+      { $project: {
+        x: '$_id.perfLevel',
+        y: '$_id.riskLevel',
+        count: 1,
+        _id: 0
+      }}
+    ]);
+
+    const matrixDistribution = matrixStats || [];
+
+    // Workforce Metrics (Task 3)
+    const fitCount = employees.filter(e => e.fitmentScore >= 20).length;
+    const misalignedCount = employees.filter(e => e.fitmentScore < 20).length;
+    const costAtRisk = employees.filter(e => e.fitmentScore < 20).reduce((sum, e) => sum + (e.salary || 0), 0);
 
     res.json({
       success: true,
@@ -323,6 +258,9 @@ export const getAnalysisSummary = async (req, res) => {
         bandDistribution: bandDistribution || {},
         matrixDistribution: matrixDistribution || [],
         automationOpportunities: automationOpportunities || [],
+        workforceFitmentPercent: totalEmployees > 0 ? (fitCount / totalEmployees) * 100 : 0,
+        misalignedCount,
+        costAtRisk,
         lastUpdated: new Date()
       },
     });
