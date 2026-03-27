@@ -5,7 +5,6 @@ import {
   BarChart3,
   Users,
   Upload,
-  Settings,
   BookOpen,
   Zap,
   Brain,
@@ -17,7 +16,6 @@ import {
   Activity,
   Layers,
   Rocket,
-  Bell,
   Sparkles,
 } from "lucide-react";
 
@@ -123,8 +121,6 @@ export function AppSidebar() {
                   <NavItem item={{ title: "Career Growth", url: "/employee/career", icon: Rocket }} />
                   <NavItem item={{ title: "AI Career Coach", url: "/employee/career-coach", icon: Sparkles }} />
                   <NavItem item={{ title: "Employee Data Form", url: "/employee/data-form", icon: ClipboardList }} />
-                  <NavItem item={{ title: "Notifications", url: "/employee/notifications", icon: Bell }} />
-                  <NavItem item={{ title: "Settings", url: "/settings", icon: Settings }} />
                 </>
               ) : (
                 insightsItems.map((item) => <NavItem key={item.title} item={item} />)

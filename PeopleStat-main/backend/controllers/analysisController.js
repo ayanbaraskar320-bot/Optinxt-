@@ -8,7 +8,7 @@ import AnalysisResult from '../models/AnalysisResult.js';
 import { calculateProductivity, calculateUtilization } from '../services/metricsEngine.js';
 import { calculateFitmentScore } from '../services/fitmentEngine.js';
 import { calculateFatigueScore } from '../services/fatigueEngine.js';
-import { generateAutomationRecommendation } from '../services/recommendationEngine.js';
+import { generateAutomationRecommendation, categorizeTalent } from '../services/recommendationEngine.js';
 import { runAnalysisPipeline } from '../services/analysisPipeline.js';
 import GapAnalysisSnapshot from '../models/GapAnalysisSnapshot.js';
 
@@ -76,7 +76,7 @@ export const getAnalysisResults = async (req, res) => {
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const total = await AnalysisResult.countDocuments(analysisFilter);
-    
+
     const results = await AnalysisResult.find(analysisFilter)
       .populate('employee_id', 'name email band process_area sub_process department position currentRole experience_years skills')
       .sort({ analysis_date: -1 })
@@ -246,9 +246,9 @@ export const getAnalysisSummary = async (req, res) => {
         avgFatigue: avgFatigue || 0,
         burnoutRiskPercent: totalEmployees > 0 ? Math.round((burnoutCount / totalEmployees) * 100) : 0,
         automationSavings: totalAutomationSavings || 0,
-        automationSavingsFormatted: totalAutomationSavings >= 100000 
-          ? `₹${(totalAutomationSavings / 100000).toFixed(1)}L`
-          : `₹${(totalAutomationSavings || 0).toLocaleString()}`,
+        automationSavingsFormatted: totalAutomationSavings >= 100000
+          ? `$${(totalAutomationSavings / 100000).toFixed(1)}L`
+          : `$${(totalAutomationSavings || 0).toLocaleString()}`,
         highPerformers: highPerformers || 0,
         underutilized: underutilized || 0,
         overloaded: overloaded || 0,

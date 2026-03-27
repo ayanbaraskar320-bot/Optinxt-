@@ -79,15 +79,15 @@ export function ProfileDropdown({ user }) {
           display: "flex",
           alignItems: "center",
           gap: "10px",
-          background: isOpen ? "rgba(106,137,167,0.1)" : "none",
+          background: isOpen ? "var(--sidebar-accent)" : "none",
           border: "none",
           borderRadius: "8px",
           cursor: "pointer",
           padding: "4px 6px 4px 4px",
-          transition: "background 0.15s",
+          transition: "all 0.15s",
         }}
-        onMouseEnter={e => e.currentTarget.style.background = "rgba(106,137,167,0.08)"}
-        onMouseLeave={e => e.currentTarget.style.background = isOpen ? "rgba(106,137,167,0.1)" : "none"}
+        onMouseEnter={e => e.currentTarget.style.background = "var(--sidebar-accent)"}
+        onMouseLeave={e => e.currentTarget.style.background = isOpen ? "var(--sidebar-accent)" : "none"}
       >
         <Avatar style={{ width: "32px", height: "32px", flexShrink: 0 }}>
           <AvatarFallback style={{ background: "#6A89A7", color: "#fff", fontSize: "12px", fontWeight: 600 }}>
@@ -95,17 +95,17 @@ export function ProfileDropdown({ user }) {
           </AvatarFallback>
         </Avatar>
         <div style={{ textAlign: "left" }}>
-          <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--brand-text, #1E2D3D)", lineHeight: 1.2, whiteSpace: "nowrap" }}>
+          <p style={{ fontSize: "13px", fontWeight: 700, color: "#FFFFFF", lineHeight: 1.2, whiteSpace: "nowrap" }}>
             {user.username}
           </p>
-          <p style={{ fontSize: "11px", color: "#6B8299", textTransform: "capitalize", lineHeight: 1.2 }}>
+          <p style={{ fontSize: "11px", color: "var(--sidebar-foreground)", opacity: 0.8, textTransform: "capitalize", lineHeight: 1.2 }}>
             {user.role}
           </p>
         </div>
         <ChevronDown
           size={14}
           style={{
-            color: "#6B8299",
+            color: "var(--sidebar-foreground)",
             transition: "transform 0.2s ease",
             transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
           }}
