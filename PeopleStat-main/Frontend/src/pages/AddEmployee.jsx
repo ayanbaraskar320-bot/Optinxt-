@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Upload, FileText, UserPlus, Loader2, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { api } from "@/servicess/api";
+import { api } from "@/services/api";
 
 export default function AddEmployee() {
   const { toast } = useToast();

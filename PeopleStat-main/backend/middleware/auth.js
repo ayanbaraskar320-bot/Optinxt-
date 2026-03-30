@@ -15,8 +15,14 @@ export const protect = async (req, res, next) => {
       // Verify token
       if (token.startsWith('demo-token-')) {
         const role = token.split('-')[2];
+        const email = role === 'manager' ? 'manager@peoplestat.com' : 'employee@peoplestat.com';
         // Create a mock user object for demo purposes
-        req.user = { id: 'demo-123', role: role, name: 'Demo User' };
+        req.user = { 
+          id: 'demo-123', 
+          role: role, 
+          name: 'Demo User',
+          email: email
+        };
         return next();
       }
 

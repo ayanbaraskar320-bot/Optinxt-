@@ -34,7 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 import EmployeeDrawer from "@/components/EmployeeDrawer";
 import { getOverallRisk } from "@/data/mockEmployeeData";
 import { getWorkforceKPIs, getAISignals } from "@/lib/workforce-utils";
-import { api } from "@/servicess/api";
+import { api } from "@/services/api";
 import { Loader2 } from "lucide-react";
 
 // ---------------- PAGE ----------------
@@ -146,8 +146,12 @@ export default function Employees() {
     const isFatigueRisk = params.get("risk") === "fatigue";
 
     return employees.filter((e) => {
-      const matchesSearch = (e.name || "").toLowerCase().includes(search.toLowerCase()) ||
-        (e.employeeId || "").toLowerCase().includes(search.toLowerCase());
+      const nameInitials = (e.name || "").split(' ').map(n => n[0]).join('').toLowerCase();
+      const searchLower = search.toLowerCase();
+      
+      const matchesSearch = (e.name || "").toLowerCase().includes(searchLower) ||
+        (e.employeeId || "").toLowerCase().includes(searchLower) ||
+        nameInitials === searchLower;
       const matchesDept = !filters.department || e.department === filters.department;
 
       // Handle the generic risk filter vs the specific fatigue redirection

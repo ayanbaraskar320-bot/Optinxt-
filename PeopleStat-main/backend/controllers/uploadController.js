@@ -281,7 +281,7 @@ export const uploadEmployeeData = async (req, res) => {
             position: emp.position || emp.Position || emp.role || emp.Role || '',
             band: emp.band || emp.Band || 'D3',
             salary: emp.salary || emp.Salary ? parseInt(emp.salary || emp.Salary) : 0,
-            experience_years: emp.experience_years || emp.experience || 0,
+            experience_years: parseInt(emp.experience_years || emp.experience) || 0,
             location: emp.location || emp.Location || 'Remote',
             updatedAt: new Date(),
           },

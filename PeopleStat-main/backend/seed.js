@@ -130,8 +130,17 @@ const seedDatabase = async () => {
   try {
     if (mongoose.connection.readyState === 0) {
       const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/ai-workforce';
-      await mongoose.connect(uri);
-      console.log('MongoDB Connected for Real Data Seeding...');
+      try {
+        await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
+        console.log('MongoDB Connected for Real Data Seeding...');
+      } catch (err) {
+        console.warn('Real MongoDB connection failed, falling back to In-Memory...');
+        const { MongoMemoryServer } = await import('mongodb-memory-server');
+        const mongod = await MongoMemoryServer.create();
+        const memUri = mongod.getUri();
+        await mongoose.connect(memUri);
+        console.log('In-Memory MongoDB Connected for Seeding!');
+      }
     }
 
     // Clear all collections
@@ -195,6 +204,99 @@ const seedDatabase = async () => {
       skills: ['Excel', 'SAP', 'Financial Analysis', 'Process Optimization'],
       joiningDate: new Date(2021, 0, 15),
     });
+
+    const cycle = '2024-Q1';
+
+    // Helper to seed all related records for an employee
+    const seedEmployeeRelatedData = async (employee, record = {}) => {
+      // Generate performance records
+      const perfRecords = [];
+      for (let i = 0; i < 3; i++) {
+        perfRecords.push(generatePerformanceRecord(employee._id, employee.process_area, record.aptitudeScores));
+      }
+      await PerformanceRecord.insertMany(perfRecords);
+
+      // Assessment Result
+      await AssessmentResult.create({
+        employeeId: employee._id,
+        aptitudeScores: {
+          spiritScore: record.aptitudeScores?.spiritScore * 10 || Math.round(50 + Math.random() * 40),
+          purposeScore: record.aptitudeScores?.purposeScore * 10 || Math.round(50 + Math.random() * 40),
+          rewardsScore: record.aptitudeScores?.rewardsScore * 10 || Math.round(50 + Math.random() * 40),
+          professionScore: record.aptitudeScores?.professionScore * 10 || Math.round(50 + Math.random() * 40)
+        },
+        softskillScoresFull: (record.softskillScoresFull || []).flatMap(cat => 
+          (cat.subcategories || []).map(sub => ({
+            category: cat.categoryName,
+            subCategory: sub.subCategoryName,
+            score: sub.score * 10 || Math.round(40 + Math.random() * 50),
+            median: sub.median * 10 || 50
+          }))
+        )
+      });
+
+      // Sprint History
+      await SprintHistory.create({
+        employeeId: employee._id,
+        cycle: cycle,
+        completedSprintCount: Math.floor(Math.random() * 12),
+        maxExpectedSprints: 12
+      });
+
+      // Working Hours
+      await WorkingHours.create({
+        employeeId: employee._id,
+        reportingPeriod: cycle,
+        generalHours: {
+          standardHours: 160,
+          overtimeHours: Math.floor(Math.random() * 40),
+          weekendWork: Math.random() > 0.8 ? 'Yes' : 'No',
+          multipleRoles: Math.random() > 0.9 ? 'Yes' : 'No',
+          deadlinePressure: faker.helpers.arrayElement(['Low', 'Medium', 'High', 'Critical'])
+        },
+        processHours: {
+          invoicing: Math.random() * 20,
+          collections: Math.random() * 20,
+          meetings: 10
+        }
+      });
+
+      // Career Profile
+      await CareerProfile.create({
+        employeeId: employee._id,
+        verifiedSkills: employee.skills.slice(0, 4),
+        targetRole: {
+          title: 'Senior ' + (employee.position || 'Specialist'),
+          requiredSkills: employee.skills.slice(0, 8)
+        }
+      });
+
+      // Fitment Response
+      await FitmentResponse.create({
+        employeeId: employee._id,
+        evaluationCycle: cycle,
+        responses: {
+          pmsRating: 15,
+          innovation: 15,
+          customerOrientation: 15,
+          collaboration: 15,
+          communication: 15,
+          leadership: 15,
+          locationPreference: 20,
+          changeReadiness: 20
+        }
+      });
+
+      // Run Pipeline
+      try {
+        await runAnalysisPipeline(employee._id, cycle);
+      } catch (pipelineErr) {
+        console.warn(`Pipeline failed for ${employee.name}:`, pipelineErr.message);
+      }
+    };
+
+    // Seed data for demo employee
+    await seedEmployeeRelatedData(demoEmployee);
     console.log('✓ Demo employee account created: employee@peoplestat.com / pass1234');
 
     // 2. Load JSON Data
@@ -284,83 +386,8 @@ const seedDatabase = async () => {
         joiningDate: new Date(2020 + Math.floor(Math.random() * 4), Math.floor(Math.random() * 12), 1),
       });
 
-      await PerformanceRecord.insertMany(perfRecords);
-
-      const cycle = '2024-Q1';
-
-      // Seed New Models
-      await AssessmentResult.create({
-        employeeId: employee._id,
-        aptitudeScores: {
-          spiritScore: record.aptitudeScores?.spiritScore * 10 || Math.round(50 + Math.random() * 40),
-          purposeScore: record.aptitudeScores?.purposeScore * 10 || Math.round(50 + Math.random() * 40),
-          rewardsScore: record.aptitudeScores?.rewardsScore * 10 || Math.round(50 + Math.random() * 40),
-          professionScore: record.aptitudeScores?.professionScore * 10 || Math.round(50 + Math.random() * 40)
-        },
-        softskillScoresFull: (record.softskillScoresFull || []).flatMap(cat => 
-          (cat.subcategories || []).map(sub => ({
-            category: cat.categoryName,
-            subCategory: sub.subCategoryName,
-            score: sub.score * 10 || Math.round(40 + Math.random() * 50),
-            median: sub.median * 10 || 50
-          }))
-        )
-      });
-
-      await SprintHistory.create({
-        employeeId: employee._id,
-        cycle: cycle,
-        completedSprintCount: Math.floor(Math.random() * 12),
-        maxExpectedSprints: 12
-      });
-
-      await WorkingHours.create({
-        employeeId: employee._id,
-        reportingPeriod: cycle,
-        generalHours: {
-          standardHours: 160,
-          overtimeHours: Math.floor(Math.random() * 40),
-          weekendWork: Math.random() > 0.8 ? 'Yes' : 'No',
-          multipleRoles: Math.random() > 0.9 ? 'Yes' : 'No',
-          deadlinePressure: faker.helpers.arrayElement(['Low', 'Medium', 'High', 'Critical'])
-        },
-        processHours: {
-          invoicing: Math.random() * 20,
-          collections: Math.random() * 20,
-          meetings: 10
-        }
-      });
-
-      await CareerProfile.create({
-        employeeId: employee._id,
-        verifiedSkills: allSkills.slice(0, 4),
-        targetRole: {
-          title: 'Senior ' + employee.position,
-          requiredSkills: allSkills.slice(0, 8)
-        }
-      });
-
-      await FitmentResponse.create({
-        employeeId: employee._id,
-        evaluationCycle: cycle,
-        responses: {
-          pmsRating: 15,
-          innovation: 15,
-          customerOrientation: 15,
-          collaboration: 15,
-          communication: 15,
-          leadership: 15,
-          locationPreference: 20,
-          changeReadiness: 20
-        }
-      });
-
-      // Run Pipeline to compute scores and snapshots
-      try {
-        await runAnalysisPipeline(employee._id, cycle);
-      } catch (pipelineErr) {
-        console.warn(`Pipeline failed for ${employee.name}:`, pipelineErr.message);
-      }
+      // Seed related data for this employee
+      await seedEmployeeRelatedData(employee, record);
     }
 
     // 5. Finalize

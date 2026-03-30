@@ -56,7 +56,7 @@ export default function Optimization() {
   }, [recommendations]);
 
   const totalEmployees = useMemo(() => {
-    return recommendations.reduce((sum, rec) => sum + rec.impact.employees, 0);
+    return recommendations.reduce((sum, rec) => sum + (rec.impact.employees || 0), 0);
   }, [recommendations]);
 
   return (

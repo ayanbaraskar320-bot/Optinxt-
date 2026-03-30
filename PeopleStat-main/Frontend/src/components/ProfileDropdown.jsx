@@ -91,7 +91,7 @@ export function ProfileDropdown({ user }) {
       >
         <Avatar style={{ width: "32px", height: "32px", flexShrink: 0 }}>
           <AvatarFallback style={{ background: "#6A89A7", color: "#fff", fontSize: "12px", fontWeight: 600 }}>
-            {user.username?.slice(0, 2).toUpperCase()}
+            {(user.name || user.username)?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <div style={{ textAlign: "left" }}>
@@ -142,7 +142,7 @@ export function ProfileDropdown({ user }) {
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <Avatar style={{ width: "42px", height: "42px" }}>
                 <AvatarFallback style={{ background: "rgba(106,137,167,0.6)", color: "#fff", fontSize: "15px", fontWeight: 700 }}>
-                  {user.username?.slice(0, 2).toUpperCase()}
+                  {(user.name || user.username)?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>

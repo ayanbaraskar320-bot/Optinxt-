@@ -26,7 +26,7 @@ import {
   CartesianGrid
 } from "recharts";
 import { employees as centralEmployeesMock, getFitmentBand } from "@/data/mockEmployeeData";
-import { api } from "@/servicess/api";
+import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 import { Loader2, Search, Download } from "lucide-react";
