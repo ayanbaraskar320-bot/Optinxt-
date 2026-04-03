@@ -32,9 +32,19 @@ export function getWorkforceKPIs(liveEmployees) {
     const highFatiguePct = Math.round((highFatigue / count) * 100);
 
     const totalAutomationSavings = data.reduce((sum, e) => {
-        const potential = e.automationPotential || e.scores?.automationPotential || 0;
+        const potential = e.automationPotential || 0;
         return sum + (potential * (e.salary || 500000) / 100);
     }, 0);
+
+    // Format savings without double $ (caller should NOT add extra $)
+    let automationSavingsFormatted;
+    if (totalAutomationSavings >= 10000000) {
+        automationSavingsFormatted = `$${(totalAutomationSavings / 10000000).toFixed(1)}Cr`;
+    } else if (totalAutomationSavings >= 100000) {
+        automationSavingsFormatted = `$${Math.round(totalAutomationSavings / 100000).toFixed(1)}L`;
+    } else {
+        automationSavingsFormatted = `$${Math.round(totalAutomationSavings).toLocaleString()}`;
+    }
 
     return {
         totalEmployees: count,
@@ -42,9 +52,7 @@ export function getWorkforceKPIs(liveEmployees) {
         avgProductivity,
         avgUtilization,
         burnoutRisk: highFatiguePct,
-        automationSavings: totalAutomationSavings >= 100000
-            ? `$${(totalAutomationSavings / 100000).toFixed(1)}L`
-            : `$${Math.round(totalAutomationSavings).toLocaleString()}`,
+        automationSavings: automationSavingsFormatted,
         rawAutomationSavings: totalAutomationSavings
     };
 }

@@ -63,17 +63,26 @@ export default function GapAnalysis() {
 
   const employeesWithGaps = useMemo(() => {
     return employees.filter(e => (e.scores?.fitment || e.fitmentScore || 0) < 85).map(e => {
-      let severity = "Low";
-      let gapCount = 1;
       const fitment = e.scores?.fitment || e.fitmentScore || 0;
-      if (fitment < 50) {
-        severity = "High";
-        gapCount = 4;
-      } else if (fitment < 75) {
-        severity = "Medium";
-        gapCount = 2;
-      }
-      return { ...e, severity, gapCount };
+      const productivity = e.scores?.productivity || e.productivity || 0;
+      const fatigue = e.fatigueScore || 0;
+
+      let severity = "Low";
+      let gapCount = 0;
+      if (fitment < 40) { severity = "High"; gapCount = 5; }
+      else if (fitment < 55) { severity = "High"; gapCount = 4; }
+      else if (fitment < 65) { severity = "Medium"; gapCount = 3; }
+      else if (fitment < 75) { severity = "Medium"; gapCount = 2; }
+      else { severity = "Low"; gapCount = 1; }
+
+      // Derive individual skill gap scores for bar variation
+      const techGap = Math.max(5, Math.min(95, 100 - fitment));
+      const softGap = Math.max(5, Math.min(95, Math.round(100 - (e.communication || fitment * 0.9))));
+      const productivityGap = Math.max(5, Math.min(95, 100 - productivity));
+      const fatigueImpact = Math.max(5, Math.min(95, Math.round(fatigue * 0.6)));
+      const experienceGap = Math.max(5, Math.min(95, Math.round((10 - Math.min(10, e.experience_years || 3)) * 8)));
+
+      return { ...e, severity, gapCount, techGap, softGap, productivityGap, fatigueImpact, experienceGap };
     });
   }, [employees]);
 
@@ -81,12 +90,18 @@ export default function GapAnalysis() {
     return employeesWithGaps.filter(
       (e) =>
         e.name.toLowerCase().includes(search.toLowerCase()) ||
-        e.position.toLowerCase().includes(search.toLowerCase())
+        (e.position || "").toLowerCase().includes(search.toLowerCase())
     );
   }, [search, employeesWithGaps]);
 
   const barData = useMemo(() => {
-    return filteredEmployees.slice(0, 10).map(e => ({ name: e.name.split(' ')[0], gaps: e.gapCount }));
+    return filteredEmployees.slice(0, 10).map(e => ({
+      name: e.name.split(' ')[0],
+      gaps: e.gapCount,
+      techGap: e.techGap,
+      softGap: e.softGap,
+      productivityGap: e.productivityGap,
+    }));
   }, [filteredEmployees]);
 
   const donutData = useMemo(() => {
@@ -164,16 +179,18 @@ export default function GapAnalysis() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden bg-white">
           <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-            <CardTitle className="text-base font-bold text-slate-900 uppercase tracking-widest">Gap Count by Employee (Top 10)</CardTitle>
+            <CardTitle className="text-base font-bold text-slate-900 uppercase tracking-widest">Skill Gap Breakdown by Employee (Top 10)</CardTitle>
           </CardHeader>
           <CardContent className="h-64 pt-6">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={barData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 10, fontWeight: 700}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 10, fontWeight: 700}} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 10, fontWeight: 700}} domain={[0, 100]} />
                 <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                <Bar dataKey="gaps" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={32} />
+                <Bar dataKey="techGap" name="Technical Gap" stackId="a" fill="#3B82F6" radius={[0, 0, 0, 0]} barSize={28} />
+                <Bar dataKey="softGap" name="Soft Skills Gap" stackId="a" fill="#F59E0B" barSize={28} />
+                <Bar dataKey="productivityGap" name="Productivity Gap" stackId="a" fill="#10B981" radius={[4, 4, 0, 0]} barSize={28} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

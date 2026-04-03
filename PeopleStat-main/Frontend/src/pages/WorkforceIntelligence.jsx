@@ -171,14 +171,14 @@ export default function WorkforceIntelligence() {
       const perf = emps.length > 0 ? Math.round(emps.reduce((sum, e) => sum + (e.productivity || 0), 0) / emps.length) : 0;
       const utils = emps.length > 0 ? Math.round(emps.reduce((sum, e) => sum + (e.utilization || 0), 0) / emps.length) : 0;
       const salary = emps.reduce((sum, e) => sum + (e.salary || 0), 0);
-      const riskCount = emps.filter(e => (e.fatigueScore || 0) > 75).length;
+      const highFatigueCount = emps.filter(e => (e.fatigueScore || 0) > 70).length;
       return {
         name: dept,
         headcount: emps.length,
         performance: perf,
         utilization: utils,
         salary: salary,
-        risk: riskCount > 2 ? "High" : riskCount > 0 ? "Medium" : "Low",
+        risk: highFatigueCount >= 2 ? "High" : highFatigueCount === 1 ? "Medium" : "Low",
       };
     });
 
@@ -197,9 +197,9 @@ export default function WorkforceIntelligence() {
   }, [employees, deptSearch, deptSort]);
 
   const predictiveInsights = useMemo(() => {
-    const attrRisk = employees.filter(e => (e.fatigueScore || 0) > 85).length;
-    const promoReady = employees.filter(e => (e.fitmentScore || 0) > 90 && (e.productivity || 0) > 85).length;
-    const trainingNeeds = employees.filter(e => (e.fitmentScore || 0) < 70).length;
+    const attrRisk = employees.filter(e => (e.fatigueScore || 0) > 75).length;
+    const promoReady = employees.filter(e => (e.fitmentScore || e.scores?.fitment || 0) >= 88 && (e.productivity || e.scores?.productivity || 0) >= 80).length;
+    const trainingNeeds = employees.filter(e => (e.fitmentScore || e.scores?.fitment || 0) < 72).length;
 
     return [
       {

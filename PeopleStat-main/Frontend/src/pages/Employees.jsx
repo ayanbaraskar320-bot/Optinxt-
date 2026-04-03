@@ -133,7 +133,7 @@ export default function Employees() {
     },
     {
       title: "Automation Savings",
-      value: `$${kpis.automationSavings}`,
+      value: kpis.automationSavings,
       delta: "+15%",
       deltaType: "up",
       icon: Zap,
@@ -467,11 +467,11 @@ export default function Employees() {
                       </td>
                       <td className="p-3">
                         <div className="flex items-center gap-2">
-                          <Progress value={e.scores?.productivity || e.productivity || 0} className="w-20" />
-                          <span className="text-xs">{e.scores?.productivity || e.productivity || 0}%</span>
+                          <Progress value={Math.round(e.scores?.productivity || e.productivity || 0)} className="w-20" />
+                          <span className="text-xs">{Math.round(e.scores?.productivity || e.productivity || 0)}%</span>
                         </div>
                       </td>
-                      <td className="p-3 font-medium text-[#0F172A]">{e.scores?.utilization || e.utilization || 0}%</td>
+                      <td className="p-3 font-medium text-[#0F172A]">{Math.round(e.scores?.utilization || e.utilization || 0)}%</td>
                       <td className="p-3">
                         {getRiskIcon(getOverallRisk(e))}
                       </td>
