@@ -2,7 +2,7 @@ services:
   - type: web
     name: ai-workforce-backend
     env: node
-    rootDir: backend
+    rootDir: Backend
     plan: free
     buildCommand: npm install
     startCommand: node server.js
