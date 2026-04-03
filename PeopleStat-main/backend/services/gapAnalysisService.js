@@ -45,13 +45,13 @@ export const calculateGapAnalysis = (
   if (stressScore > 50) gapsDetected++;
   if (workloadScore > 85) gapsDetected++;
 
-  // STEP 4: Gap Severity Score
-  const gapSeverityScore = (performanceGap * 0.3) + (focusGap * 0.3) + (stressGap * 0.4);
+  // STEP 4: Gap Severity Score (Weights: Perf 0.3, Focus 0.2, Stress 0.4, Workload 0.1)
+  const gapSeverityScore = (performanceGap * 0.3) + (focusGap * 0.2) + (stressGap * 0.4) + (workloadGap * 0.1);
 
   // STEP 5: Severity Classification
   let label;
-  if (gapSeverityScore < 20) label = 'OK';
-  else if (gapSeverityScore < 50) label = 'Needs Improvement';
+  if (gapSeverityScore <= 15) label = 'OK';
+  else if (gapSeverityScore <= 40) label = 'Needs Improvement';
   else label = 'Serious Issue';
 
   return {

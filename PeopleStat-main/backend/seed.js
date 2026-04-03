@@ -191,8 +191,15 @@ const seedDatabase = async () => {
       process_area: 'F&A',
       sub_process: 'Invoice Posting',
       salary: 850000,
+      currentCTC: 850000,
       experience_years: 5,
       location: 'Bangalore, India',
+      grade: 'M4',
+      designation: 'Senior Analyst',
+      employmentType: 'Full-Time',
+      benchmarkCTC: 900000,
+      primaryProcess: 'F&A',
+      secondaryProcess: 'PSS',
       productivity: 88,
       utilization: 75,
       fitmentScore: 92,
@@ -217,22 +224,37 @@ const seedDatabase = async () => {
       await PerformanceRecord.insertMany(perfRecords);
 
       // Assessment Result
+      const softskillScoresFull = (record.softskillScoresFull || []).flatMap(cat => {
+        const subScores = (cat.subcategories || []).map(sub => sub.score * 10).filter(s => !isNaN(s));
+        const catMean = subScores.length > 0 
+          ? (subScores.reduce((a, b) => a + b, 0) / subScores.length) 
+          : (typeof cat.score === 'number' ? cat.score * 10 : 50);
+        
+        return (cat.subcategories || []).map(sub => ({
+          category: cat.categoryName,
+          categoryMean: catMean,
+          categoryWeight: 0.1, // default
+          subCategory: sub.subCategoryName,
+          score: (typeof sub.score === 'number' && !isNaN(sub.score)) ? sub.score * 10 : Math.round(40 + Math.random() * 50),
+          median: (typeof sub.median === 'number' && !isNaN(sub.median)) ? sub.median * 10 : 50,
+          tag: sub.tag || 'Standard'
+        }));
+      });
+
+      const safeAptitude = (val) => {
+        const num = parseFloat(val);
+        return isNaN(num) ? Math.round(50 + Math.random() * 40) : num * 10;
+      };
+
       await AssessmentResult.create({
         employeeId: employee._id,
         aptitudeScores: {
-          spiritScore: record.aptitudeScores?.spiritScore * 10 || Math.round(50 + Math.random() * 40),
-          purposeScore: record.aptitudeScores?.purposeScore * 10 || Math.round(50 + Math.random() * 40),
-          rewardsScore: record.aptitudeScores?.rewardsScore * 10 || Math.round(50 + Math.random() * 40),
-          professionScore: record.aptitudeScores?.professionScore * 10 || Math.round(50 + Math.random() * 40)
+          spiritScore: safeAptitude(record.aptitudeScores?.spiritScore),
+          purposeScore: safeAptitude(record.aptitudeScores?.purposeScore),
+          rewardsScore: safeAptitude(record.aptitudeScores?.rewardsScore),
+          professionScore: safeAptitude(record.aptitudeScores?.professionScore)
         },
-        softskillScoresFull: (record.softskillScoresFull || []).flatMap(cat => 
-          (cat.subcategories || []).map(sub => ({
-            category: cat.categoryName,
-            subCategory: sub.subCategoryName,
-            score: sub.score * 10 || Math.round(40 + Math.random() * 50),
-            median: sub.median * 10 || 50
-          }))
-        )
+        softskillScoresFull: softskillScoresFull
       });
 
       // Sprint History
@@ -240,7 +262,10 @@ const seedDatabase = async () => {
         employeeId: employee._id,
         cycle: cycle,
         completedSprintCount: Math.floor(Math.random() * 12),
-        maxExpectedSprints: 12
+        maxExpectedSprints: 12,
+        computed: {
+          workloadScore: Math.round(Math.random() * 100)
+        }
       });
 
       // Working Hours
@@ -268,6 +293,9 @@ const seedDatabase = async () => {
         targetRole: {
           title: 'Senior ' + (employee.position || 'Specialist'),
           requiredSkills: employee.skills.slice(0, 8)
+        },
+        computed: {
+          skillGaps: employee.skills.slice(4, 8)
         }
       });
 
@@ -277,12 +305,17 @@ const seedDatabase = async () => {
         evaluationCycle: cycle,
         responses: {
           pmsRating: 15,
-          innovation: 15,
+          complexityOfWork: 15,
+          innovationTechSavvy: 15,
           customerOrientation: 15,
-          collaboration: 15,
+          teamCollaboration: 15,
           communication: 15,
-          leadership: 15,
+          leadershipCompetence: 15,
           locationPreference: 20,
+          totalExperience: 20,
+          ctcEfficiency: 20,
+          multiplexer: 20,
+          selfMotivation: 20,
           changeReadiness: 20
         }
       });
@@ -368,8 +401,14 @@ const seedDatabase = async () => {
         process_area: processArea,
         sub_process: subProcess,
         salary: Math.round((400000 + Math.random() * 1200000) / 1000) * 1000, 
+        currentCTC: Math.round((400000 + Math.random() * 1200000) / 1000) * 1000, // will be overwritten by same logic to be safe
         experience_years: BAND_EXPERIENCE[band] + Math.floor(Math.random() * 3),
         location: 'Bangalore, India',
+        grade: band,
+        designation: record.careerProfile?.roles?.[0] || 'Specialist',
+        employmentType: 'Full-Time',
+        primaryProcess: processArea,
+        secondaryProcess: subProcess,
         // Set initial scores based on aptitude but with random variance to ensure non-zero dashboard
         productivity: Math.round(70 + Math.random() * 25),
         utilization: Math.round(65 + Math.random() * 30),

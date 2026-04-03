@@ -31,6 +31,8 @@ export const calculateMatrixPosition = (
   const riskLevel = getLevel(matrixRisk);
 
   return {
+    performanceScore: matrixPerformance,
+    riskScore: matrixRisk,
     performanceLevel: perfLevel,
     riskLevel: riskLevel,
     cellPosition: `P${perfLevel}-R${riskLevel}`

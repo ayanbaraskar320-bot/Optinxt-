@@ -21,9 +21,17 @@ const gapAnalysisSnapshotSchema = new mongoose.Schema({
     label: { type: String, enum: ['OK', 'Needs Improvement', 'Serious Issue'] }
   },
   talentMatrix: {
+    performanceScore: Number,
+    riskScore: Number,
     performanceLevel: Number,
     riskLevel: Number,
     cellPosition: String // e.g. 'P4-R2'
+  },
+  deltas: {
+    performanceDelta: Number,
+    focusDelta: Number,
+    stressDelta: Number,
+    workloadDelta: Number
   },
   fitmentScoreAlt: Number
 }, { timestamps: true });

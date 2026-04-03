@@ -11,9 +11,12 @@ const assessmentResultsSchema = new mongoose.Schema({
   },
   softskillScoresFull: [{
     category: String,
+    categoryMean: Number,
+    categoryWeight: Number,
     subCategory: String,
     score: Number, // 0-10 or 0-100 normalized
-    median: Number
+    median: Number,
+    tag: String
   }],
   computed: {
     healthIndex: Number,

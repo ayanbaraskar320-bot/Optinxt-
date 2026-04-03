@@ -7,7 +7,8 @@ const sprintHistorySchema = new mongoose.Schema({
   maxExpectedSprints: { type: Number, default: 12 },
   computed: {
     productivityScore: Number,
-    productivityTier: String
+    productivityTier: String,
+    workloadScore: Number
   }
 }, { timestamps: true });
 

@@ -24,8 +24,11 @@ const workingHoursSchema = new mongoose.Schema({
   computed: {
     utilizationRate: Number,
     fatigueRisk: Number,
+    fatigueRiskScore: Number, // alias/redundant for audit
     fatigueTier: String,
-    totalProcessHours: Number
+    fatigueRiskLevel: String, // from audit
+    totalProcessHours: Number,
+    overtimeRatio: Number
   }
 }, { timestamps: true });
 

@@ -123,7 +123,32 @@ export const runAnalysisPipeline = async (employeeId, cycle = '2024-Q1') => {
     {
       'computed.utilizationRate': ((workingHours.totalProcessHours || 0) / (workingHours.generalHours?.standardHours || 160)) * 100,
       'computed.fatigueRisk': fatigueResult.fatigueRisk,
-      'computed.fatigueTier': fatigueResult.tier
+      'computed.fatigueRiskScore': fatigueResult.fatigueRisk,
+      'computed.fatigueTier': fatigueResult.tier,
+      'computed.fatigueRiskLevel': fatigueResult.tier,
+      'computed.overtimeRatio': fatigueResult.overtimeRatio
+    }
+  );
+
+  // Update SprintHistory
+  const productivity = productivityService.calculateProductivity(completedSprintCount, maxExpectedSprints);
+  await SprintHistory.findOneAndUpdate(
+    { employeeId, cycle },
+    {
+      'computed.productivityScore': productivity.productivityScore,
+      'computed.productivityTier': productivity.tier,
+      'computed.workloadScore': workloadScore
+    }
+  );
+
+  // Update CareerProfile
+  await CareerProfile.findOneAndUpdate(
+    { employeeId },
+    {
+      'computed.careerFitment': careerReadiness.checklistCompletion,
+      'computed.skillGaps': careerReadiness.skillGaps,
+      'computed.promotionReadiness': careerReadiness.promotionReadiness,
+      'computed.competencyRadar': careerReadiness.radar
     }
   );
 

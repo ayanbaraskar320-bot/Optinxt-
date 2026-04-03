@@ -16,6 +16,16 @@ const employeeSchema = new mongoose.Schema({
   joiningDate: Date,
   experience_years: { type: Number, default: 0 },
   location: String,
+  grade: String, // from audit
+  designation: String, // from audit
+  employmentType: { type: String, enum: ['Full-Time', 'Part-Time', 'Contractor', 'Freelance'], default: 'Full-Time' },
+  managerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  currentCTC: Number,
+  benchmarkCTC: { type: Number, default: 500000 },
+  ctcBenchmark: Number,
+  primaryProcess: String,
+  secondaryProcess: String,
+  roleDescription: String,
   
   // Direct scores (computed by analytics engine)
   productivity: { type: Number, min: 0, max: 100, default: 0 },

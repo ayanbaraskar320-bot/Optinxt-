@@ -2,6 +2,17 @@
  * Task 4 & 9 & 10: Soft Skills, Career Growth, AI Coach
  */
 
+const DEFAULT_CATEGORY_WEIGHTS = {
+  'Communication': 0.15,
+  'Problem Solving': 0.15,
+  'Teamwork': 0.10,
+  'Adaptability': 0.15,
+  'Attention to Detail': 0.10,
+  'Time Management': 0.10,
+  'Interpersonal Skills': 0.15,
+  'Leadership': 0.10
+};
+
 export const calculateSoftSkillHealth = (softskillScores = []) => {
   const categoryGroups = softskillScores.reduce((acc, s) => {
     if (!acc[s.category]) acc[s.category] = [];
@@ -11,12 +22,19 @@ export const calculateSoftSkillHealth = (softskillScores = []) => {
 
   const categoryMeans = Object.entries(categoryGroups).map(([name, scores]) => {
     const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
-    return { name, mean };
+    const weight = DEFAULT_CATEGORY_WEIGHTS[name] || (1 / Object.keys(categoryGroups).length);
+    return { name, mean, weight };
   });
 
-  const healthIndex = categoryMeans.length > 0
-    ? categoryMeans.reduce((sum, cat) => sum + cat.mean, 0) / categoryMeans.length
-    : 0;
+  // Calculate Weighted Health Index
+  let healthIndex = 0;
+  let totalWeight = 0;
+  categoryMeans.forEach(cat => {
+    healthIndex += (cat.mean * cat.weight);
+    totalWeight += cat.weight;
+  });
+
+  if (totalWeight > 0) healthIndex = healthIndex / totalWeight;
 
   return { healthIndex, categoryMeans };
 };
@@ -43,7 +61,7 @@ export const calculateCareerReadiness = (
     problemSolving: getCategoryMean('Problem Solving'),
     teamwork: getCategoryMean('Teamwork'),
     adaptability: getCategoryMean('Adaptability'),
-    productivity: (completedSprintCount / 12) * 100
+    productivity: Math.min((completedSprintCount / 12) * 100, 100)
   };
 
   // Simplified Area check
